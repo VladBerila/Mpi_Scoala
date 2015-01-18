@@ -42,7 +42,7 @@ int main(int argc, char * argv[])
 {
     
     // nr de procese
-    int nNumOfProcs, rank, numarPePrc;
+    int nNumOfProcs, rank;
     
     // insert code here...
     MPI_Init(&argc , &argv);
@@ -169,5 +169,10 @@ void master()
     // Retinem mutarile
     ///
     int stivaMutari[1000];
-    int nStivaMutari = 0; 
+    int nStivaMutari = 0;
+}
+
+void slave()
+{
+    
 }
