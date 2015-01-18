@@ -45,6 +45,7 @@ int nPozitiiPosibile = 0;
 void master();
 void slave();
 void computeOrientationVectors(char orientare);
+void init();
 
 int main(int argc, char * argv[])
 {
@@ -69,6 +70,14 @@ int main(int argc, char * argv[])
     return 0;
 }
 
+void init()
+{
+    // citire din fisier
+    // TO DO
+    
+    computeOrientationVectors(profesor.directie);
+}
+
 void computeOrientationVectors(char orientare)
 {
     switch (orientare)
@@ -89,38 +98,11 @@ struct Vedere getVedere()
     struct Vedere vedere;
     int i = profesor.i;
     int j = profesor.j;
-    
-    if(profesor.directie == 'N')
-    {
-        vedere.fata = Harta[i-1][j];
-        vedere.dreapta = Harta[i][j+1];
-        vedere.spate = Harta[i+1][j];
-        vedere.stanga = Harta[i][j-1];
-    }
-    
-    if(profesor.directie == 'S')
-    {
-        vedere.fata = Harta[i+1][j];
-        vedere.dreapta = Harta[i][j-1];
-        vedere.spate = Harta[i-1][j];
-        vedere.stanga = Harta[i][j+1];
-    }
-    
-    if(profesor.directie == 'E')
-    {
-        vedere.fata = Harta[i][j+1];
-        vedere.dreapta = Harta[i+1][j];
-        vedere.spate = Harta[i][j-1];
-        vedere.stanga = Harta[i-1][j];
-    }
-    
-    if(profesor.directie == 'V')
-    {
-        vedere.fata = Harta[i][j-1];
-        vedere.dreapta = Harta[i-1][j];
-        vedere.spate = Harta[i][j+1];
-        vedere.stanga = Harta[i+1][j];
-    }
+
+    vedere.fata = Harta[i + dirI[0]][j + dirJ[0]];
+    vedere.spate = Harta[i + dirI[1]][j + dirJ[1]];
+    vedere.dreapta = Harta[i + dirI[2]][j + dirJ[2]];
+    vedere.stanga = Harta[i + dirI[3]][j + dirJ[3]];
     vedere.i = i;
     vedere.j = j;
     
