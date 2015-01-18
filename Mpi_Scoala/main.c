@@ -109,6 +109,10 @@ struct Vedere getVedere()
     return vedere;
 }
 
+void MoveProfessor(char directie)
+{
+}
+
 //directie = f,b,l,r
 //forward, back, left, right
 int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie pozitiiPosibile[])
@@ -124,7 +128,8 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
         return 0;
     
     //Il mutam pe profesor
-    //TO DO
+    MoveProfessor(directie);
+    
     hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] = 1;
     
     //Updatam ce vede
@@ -149,6 +154,10 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     if(deplaseaza('f',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('b',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('l',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('r',vedereNoua,pozitiiPosibileUpdatate) == 0);
     
     //Resetam Patternul, o poate lua si pe aici acum
+    if(directie == 'f') MoveProfessor('b');
+    if(directie == 'b') MoveProfessor('f');
+    if(directie == 'l') MoveProfessor('r');
+    if(directie == 'r') MoveProfessor('l');
     hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] = 0;
     
     return 0;
