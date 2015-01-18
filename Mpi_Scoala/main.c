@@ -111,6 +111,13 @@ struct Vedere getVedere()
 
 void MoveProfessor(char directie)
 {
+    switch (directie)
+    {
+        case 'f' : profesor.i += dirI[0], profesor.j += dirJ[0]; break;
+        case 'b' : profesor.i += dirI[1], profesor.j += dirJ[1]; break;
+        case 'r' : profesor.i += dirI[2], profesor.j += dirJ[2]; break;
+        case 'l' : profesor.i += dirI[3], profesor.j += dirJ[3]; break;
+    }
 }
 
 //directie = f,b,l,r
