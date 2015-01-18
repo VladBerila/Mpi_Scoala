@@ -35,6 +35,9 @@ struct Profesor
 int Harta[100][100];
 int N,M;
 
+struct Pozitie pozitiiPosibile[10000];
+int nPozitiiPosibile = 0;
+
 void master();
 void slave();
 
@@ -42,7 +45,7 @@ int main(int argc, char * argv[])
 {
     
     // nr de procese
-    int nNumOfProcs, rank;
+    int nNumOfProcs, rank, numarPePrc;
     
     // insert code here...
     MPI_Init(&argc , &argv);
@@ -102,11 +105,22 @@ struct Vedere getVedere()
     return vedere;
 }
 
-void master()
+//directie = f,b,l,r
+//forward, back, left, right
+int deplaseaza(char directie, struct Pozitie pozitiiPosibile[])
 {
     struct Pozitie pozitiiPosibile[10000];
     int nPozitiiPosibile = 0;
     
+    //Daca ne blocam ne intoarcem
+    //TO DO
+    
+    return 0;
+    
+}
+
+void master()
+{
     struct Vedere vedereCurenta = getVedere();
     
     ///
