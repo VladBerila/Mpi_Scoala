@@ -46,6 +46,7 @@ void master();
 void slave();
 void computeOrientationVectors(char orientare);
 void init();
+int checkMatch(struct Vedere vedere,int i, int j,char orientare);
 
 int main(int argc, char * argv[])
 {
@@ -171,6 +172,21 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     
 }
 
+int checkMatch(struct Vedere vedere,int i, int j,char orientare)
+{
+    struct Vedere vedereCurenta = vedere;
+    if(orientare == 'N' && vedereCurenta.fata == Harta[i-1][j] && vedereCurenta.dreapta == Harta[i][j+1] && vedereCurenta.spate == Harta[i+1][j] && vedereCurenta.stanga == Harta[i][j-1])
+        return 1;
+    if(orientare == 'S' && vedereCurenta.fata == Harta[i+1][j] && vedereCurenta.dreapta == Harta[i][j-1] && vedereCurenta.spate == Harta[i-1][j] && vedereCurenta.stanga == Harta[i][j+1])
+        return 1;
+    if(orientare == 'E' && vedereCurenta.fata == Harta[i][j+1] && vedereCurenta.dreapta == Harta[i+1][j] && vedereCurenta.spate == Harta[i][j-1] && vedereCurenta.stanga == Harta[i-1][j])
+        return 1;
+    if(orientare == 'V' && vedereCurenta.fata == Harta[i][j-1] && vedereCurenta.dreapta == Harta[i-1][j] && vedereCurenta.spate == Harta[i][j+1] && vedereCurenta.stanga == Harta[i+1][j])
+        return 1;
+    
+    return 0;
+}
+
 void master()
 {
     struct Vedere vedereCurenta = getVedere();
@@ -181,47 +197,27 @@ void master()
     for(int i = 1; i <= N; i++)
         for(int j = 1; j <= M; j++)
         {
+            char dD = 'X';
             //Directia N
-            if(vedereCurenta.fata == Harta[i-1][j] && vedereCurenta.dreapta == Harta[i][j+1] && vedereCurenta.spate == Harta[i+1][j] && vedereCurenta.stanga == Harta[i][j-1])
-            {
-                struct Pozitie pozitie;
-                pozitie.directie = 'N';
-                pozitie.i = i;
-                pozitie.j = j;
-                pozitie.iAnterior = -1;
-                pozitie.jAnterior = -1;
-                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
-            }
+            if(checkMatch(vedereCurenta,i,j,'N'))
+                dD = 'N';
             
             //Directia S
-            if(vedereCurenta.fata == Harta[i+1][j] && vedereCurenta.dreapta == Harta[i][j-1] && vedereCurenta.spate == Harta[i-1][j] && vedereCurenta.stanga == Harta[i][j+1])
-            {
-                struct Pozitie pozitie;
-                pozitie.directie = 'S';
-                pozitie.i = i;
-                pozitie.j = j;
-                pozitie.iAnterior = -1;
-                pozitie.jAnterior = -1;
-                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
-            }
+            if(checkMatch(vedereCurenta,i,j,'S'))
+                dD = 'S';
             
             //Directia E
-            if(vedereCurenta.fata == Harta[i][j+1] && vedereCurenta.dreapta == Harta[i+1][j] && vedereCurenta.spate == Harta[i][j-1] && vedereCurenta.stanga == Harta[i-1][j])
-            {
-                struct Pozitie pozitie;
-                pozitie.directie = 'E';
-                pozitie.i = i;
-                pozitie.j = j;
-                pozitie.iAnterior = -1;
-                pozitie.jAnterior = -1;
-                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
-            }
-            
+            if(checkMatch(vedereCurenta,i,j,'E'))
+                dD = 'E';
+
             //Directia V
-            if(vedereCurenta.fata == Harta[i][j-1] && vedereCurenta.dreapta == Harta[i-1][j] && vedereCurenta.spate == Harta[i][j+1] && vedereCurenta.stanga == Harta[i+1][j])
+            if(checkMatch(vedereCurenta,i,j,'V'))
+                dD = 'V';
+
+            if(dD != 'X')
             {
                 struct Pozitie pozitie;
-                pozitie.directie = 'V';
+                pozitie.directie = dD;
                 pozitie.i = i;
                 pozitie.j = j;
                 pozitie.iAnterior = -1;
