@@ -35,6 +35,9 @@ struct Profesor
 int Harta[100][100];
 int N,M;
 
+struct Pozitie pozitiiPosibile[10000];
+int nPozitiiPosibile = 0;
+
 void master();
 void slave();
 
@@ -42,7 +45,7 @@ int main(int argc, char * argv[])
 {
     
     // nr de procese
-    int nNumOfProcs, rank;
+    int nNumOfProcs, rank, numarPePrc;
     
     // insert code here...
     MPI_Init(&argc , &argv);
@@ -102,11 +105,49 @@ struct Vedere getVedere()
     return vedere;
 }
 
+//directie = f,b,l,r
+//forward, back, left, right
+int deplaseaza(char directie, struct Pozitie pozitiiPosibile[])
+{
+    struct Vedere vedereCurenta = getVedere();
+    
+    //Nu il deplasam daca da de copac sau prapastie
+    if( (directie == 'f' && (vedereCurenta.fata == 'T' || vedereCurenta.fata == 'C')) ||
+       (directie == 'b' && (vedereCurenta.spate == 'T' || vedereCurenta.spate == 'C')) ||
+       (directie == 'l' && (vedereCurenta.stanga == 'T' || vedereCurenta.stanga == 'C')) ||
+       (directie == 'r' && (vedereCurenta.dreapta == 'T' || vedereCurenta.dreapta == 'C'))
+       )
+        return 0;
+    
+    //Il mutam pe profesor
+    //TO DO
+    
+    //Updatam ce vede
+    struct Vedere vedereNoua = getVedere();
+    
+    ///
+    // Trimitem la sclavi pozitiile, directia si noua vedere
+    ///
+    //TO DO
+    
+    // Ne returneaza pozitiile care se potrivesc si refacem lista
+    //
+    // Obs! Nu trebuie sa retinem pozitiile eliminate in eventualitatea intoarcerii in recursivitate
+    // deoarece pozitiile eliminate nu pot fi solutii
+    ///
+    
+    //Incercam mutare
+    if(deplaseaza('f') == 0) if(deplaseaza('b') == 0) if(deplaseaza('l') == 0) if(deplaseaza('r') == 0);
+    
+    //Daca ne blocam ne intoarcem
+    //TO DO
+    
+    return 0;
+    
+}
+
 void master()
 {
-    struct Pozitie pozitiiPosibile[10000];
-    int capatStiva = 0;
-    
     struct Vedere vedereCurenta = getVedere();
     
     ///
@@ -124,7 +165,7 @@ void master()
                 pozitie.j = j;
                 pozitie.iAnterior = -1;
                 pozitie.jAnterior = -1;
-                pozitiiPosibile[capatStiva++] = pozitie;
+                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
             }
             
             //Directia S
@@ -136,7 +177,7 @@ void master()
                 pozitie.j = j;
                 pozitie.iAnterior = -1;
                 pozitie.jAnterior = -1;
-                pozitiiPosibile[capatStiva++] = pozitie;
+                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
             }
             
             //Directia E
@@ -148,7 +189,7 @@ void master()
                 pozitie.j = j;
                 pozitie.iAnterior = -1;
                 pozitie.jAnterior = -1;
-                pozitiiPosibile[capatStiva++] = pozitie;
+                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
             }
             
             //Directia V
@@ -160,13 +201,22 @@ void master()
                 pozitie.j = j;
                 pozitie.iAnterior = -1;
                 pozitie.jAnterior = -1;
-                pozitiiPosibile[capatStiva++] = pozitie;
+                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
             }
-
+            
         }
-}
-
-void slave()
-{
+    
+    ///
+    // Il plimbam pe profesor prin padure
+    ///
+    if(deplaseaza('f',pozitiiPosibile) == 0)
+        if(deplaseaza('b',pozitiiPosibile) == 0)
+            if(deplaseaza('l',pozitiiPosibile) == 0)
+                if(deplaseaza('r',pozitiiPosibile) == 0);
+    
+    
+    
+    
+    
     
 }
