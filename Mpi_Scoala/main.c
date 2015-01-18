@@ -209,27 +209,47 @@ void master()
     for(int i = 1; i <= N; i++)
         for(int j = 1; j <= M; j++)
         {
-            char dD = 'X';
             //Directia N
             if(checkMatch(vedereCurenta,i,j,'N'))
-                dD = 'N';
+            {
+                struct Pozitie pozitie;
+                pozitie.directie = 'N';
+                pozitie.i = i;
+                pozitie.j = j;
+                pozitie.iAnterior = -1;
+                pozitie.jAnterior = -1;
+                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
+            }
             
             //Directia S
             if(checkMatch(vedereCurenta,i,j,'S'))
-                dD = 'S';
+            {
+                struct Pozitie pozitie;
+                pozitie.directie = 'S';
+                pozitie.i = i;
+                pozitie.j = j;
+                pozitie.iAnterior = -1;
+                pozitie.jAnterior = -1;
+                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
+            }
             
             //Directia E
             if(checkMatch(vedereCurenta,i,j,'E'))
-                dD = 'E';
+            {
+                struct Pozitie pozitie;
+                pozitie.directie = 'E';
+                pozitie.i = i;
+                pozitie.j = j;
+                pozitie.iAnterior = -1;
+                pozitie.jAnterior = -1;
+                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
+            }
 
             //Directia V
             if(checkMatch(vedereCurenta,i,j,'V'))
-                dD = 'V';
-
-            if(dD != 'X')
             {
                 struct Pozitie pozitie;
-                pozitie.directie = dD;
+                pozitie.directie = 'V';
                 pozitie.i = i;
                 pozitie.j = j;
                 pozitie.iAnterior = -1;
