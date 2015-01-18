@@ -24,6 +24,8 @@ struct Vedere
 {
     //T,C,O,R
     char fata, spate, stanga, dreapta;
+    //Doar pentru a ne ajuta sa nu intram in cicluri
+    int i,j;
 };
 
 struct Profesor
@@ -33,6 +35,7 @@ struct Profesor
 } profesor;
 
 int Harta[100][100];
+int hartaPatternMutari[100][100];
 int N,M;
 
 struct Pozitie pozitiiPosibile[10000];
@@ -101,13 +104,15 @@ struct Vedere getVedere()
         vedere.spate = Harta[i][j+1];
         vedere.stanga = Harta[i+1][j];
     }
+    vedere.i = i;
+    vedere.j = j;
     
     return vedere;
 }
 
 //directie = f,b,l,r
 //forward, back, left, right
-int deplaseaza(char directie, struct Pozitie pozitiiPosibile[])
+int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie pozitiiPosibile[])
 {
     struct Pozitie pozitiiPosibile[10000];
     int nPozitiiPosibile = 0;
