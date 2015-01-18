@@ -37,14 +37,24 @@ struct Profesor
 int Harta[100][100];
 int hartaPatternMutari[100][100];
 int N,M;
-int dirI[4], dirJ[4];
+
+// orientarea profului e publica si globala doar ca un move helper pt el. sclavii nu stiu de ea
+
+/*
+ fata = 0
+ spate = 1
+ dreapta = 2
+ stanga = 3
+ */
+int dirIProf[4], dirJProf[4];
+
 
 struct Pozitie pozitiiPosibile[10000];
 int nPozitiiPosibile = 0;
 
 void master();
 void slave();
-void computeOrientationVectors(char orientare);
+void computeOrientationVectors(char orientare, int dirI[4], int dirJ[4]);
 void init();
 int checkMatch(struct Vedere vedere,int i, int j,char orientare);
 
@@ -76,10 +86,10 @@ void init()
     // citire din fisier
     // TO DO
     
-    computeOrientationVectors(profesor.directie);
+    computeOrientationVectors(profesor.directie, dirIProf, dirJProf);
 }
 
-void computeOrientationVectors(char orientare)
+void computeOrientationVectors(char orientare, int dirI[4], int dirJ[4])
 {
     switch (orientare)
     {
@@ -100,10 +110,10 @@ struct Vedere getVedere()
     int i = profesor.i;
     int j = profesor.j;
 
-    vedere.fata = Harta[i + dirI[0]][j + dirJ[0]];
-    vedere.spate = Harta[i + dirI[1]][j + dirJ[1]];
-    vedere.dreapta = Harta[i + dirI[2]][j + dirJ[2]];
-    vedere.stanga = Harta[i + dirI[3]][j + dirJ[3]];
+    vedere.fata = Harta[i + dirIProf[0]][j + dirJProf[0]];
+    vedere.spate = Harta[i + dirIProf[1]][j + dirJProf[1]];
+    vedere.dreapta = Harta[i + dirIProf[2]][j + dirJProf[2]];
+    vedere.stanga = Harta[i + dirIProf[3]][j + dirJProf[3]];
     vedere.i = i;
     vedere.j = j;
     
@@ -114,10 +124,10 @@ void MoveProfessor(char directie)
 {
     switch (directie)
     {
-        case 'f' : profesor.i += dirI[0], profesor.j += dirJ[0]; break;
-        case 'b' : profesor.i += dirI[1], profesor.j += dirJ[1]; break;
-        case 'r' : profesor.i += dirI[2], profesor.j += dirJ[2]; break;
-        case 'l' : profesor.i += dirI[3], profesor.j += dirJ[3]; break;
+        case 'f' : profesor.i += dirIProf[0], profesor.j += dirJProf[0]; break;
+        case 'b' : profesor.i += dirIProf[1], profesor.j += dirJProf[1]; break;
+        case 'r' : profesor.i += dirIProf[2], profesor.j += dirJProf[2]; break;
+        case 'l' : profesor.i += dirIProf[3], profesor.j += dirJProf[3]; break;
     }
 }
 
@@ -175,14 +185,16 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
 int checkMatch(struct Vedere vedere,int i, int j,char orientare)
 {
     struct Vedere vedereCurenta = vedere;
-    if(orientare == 'N' && vedereCurenta.fata == Harta[i-1][j] && vedereCurenta.dreapta == Harta[i][j+1] && vedereCurenta.spate == Harta[i+1][j] && vedereCurenta.stanga == Harta[i][j-1])
+    int dirI[4], dirJ[4];
+    
+    computeOrientationVectors(orientare, dirI, dirJ);
+    
+    if(vedereCurenta.fata == Harta[i + dirI[0]][j + dirJ[0]]
+       && vedereCurenta.dreapta == Harta[i + dirI[2]][j + dirJ[2]]
+       && vedereCurenta.spate == Harta[i + dirI[1]][j + dirJ[1]]
+       && vedereCurenta.stanga == Harta[i + dirI[3]][j + dirJ[3]])
         return 1;
-    if(orientare == 'S' && vedereCurenta.fata == Harta[i+1][j] && vedereCurenta.dreapta == Harta[i][j-1] && vedereCurenta.spate == Harta[i-1][j] && vedereCurenta.stanga == Harta[i][j+1])
-        return 1;
-    if(orientare == 'E' && vedereCurenta.fata == Harta[i][j+1] && vedereCurenta.dreapta == Harta[i+1][j] && vedereCurenta.spate == Harta[i][j-1] && vedereCurenta.stanga == Harta[i-1][j])
-        return 1;
-    if(orientare == 'V' && vedereCurenta.fata == Harta[i][j-1] && vedereCurenta.dreapta == Harta[i-1][j] && vedereCurenta.spate == Harta[i][j+1] && vedereCurenta.stanga == Harta[i+1][j])
-        return 1;
+
     
     return 0;
 }
