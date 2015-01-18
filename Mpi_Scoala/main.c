@@ -37,12 +37,14 @@ struct Profesor
 int Harta[100][100];
 int hartaPatternMutari[100][100];
 int N,M;
+int dirI[4], dirJ[4];
 
 struct Pozitie pozitiiPosibile[10000];
 int nPozitiiPosibile = 0;
 
 void master();
 void slave();
+void computeOrientationVectors(char orientare);
 
 int main(int argc, char * argv[])
 {
@@ -65,6 +67,21 @@ int main(int argc, char * argv[])
     MPI_Finalize();
     
     return 0;
+}
+
+void computeOrientationVectors(char orientare)
+{
+    switch (orientare)
+    {
+        case 'N': dirI[0] = -1, dirI[1] = 1, dirI[2] = dirI[3] = 0, dirJ[0] = 0, dirJ[1] = 0, dirJ[2] = 1, dirJ[3] = -1;
+            break;
+        case 'S': dirI[0] = 1, dirI[1] = -1, dirI[2] = dirI[3] = 0, dirJ[0] = 0, dirJ[1] = 0, dirJ[2] = -1, dirJ[3] = 1;
+            break;
+        case 'E': dirI[0] = dirI[1] = 0, dirI[2] = 1, dirI[3] = -1, dirJ[0] = 1, dirJ[1] = -1, dirJ[2] = 0, dirJ[3] = 0;
+            break;
+        case 'V': dirI[0] = dirI[1] = 0, dirI[2] = -1, dirI[3] = 1, dirJ[0] = -1, dirJ[1] = 1, dirJ[2] = 0, dirJ[3] = 0;
+            break;
+    }
 }
 
 struct Vedere getVedere()
@@ -114,11 +131,43 @@ struct Vedere getVedere()
 //forward, back, left, right
 int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie pozitiiPosibile[])
 {
-    struct Pozitie pozitiiPosibile[10000];
-    int nPozitiiPosibile = 0;
+    if(hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] == 1)
+        return 0;
+    //Nu il deplasam daca da de copac sau prapastie
+    if( (directie == 'f' && (vedereCurenta.fata == 'T' || vedereCurenta.fata == 'C')) ||
+       (directie == 'b' && (vedereCurenta.spate == 'T' || vedereCurenta.spate == 'C')) ||
+       (directie == 'l' && (vedereCurenta.stanga == 'T' || vedereCurenta.stanga == 'C')) ||
+       (directie == 'r' && (vedereCurenta.dreapta == 'T' || vedereCurenta.dreapta == 'C'))
+       )
+        return 0;
     
-    //Daca ne blocam ne intoarcem
+    //Il mutam pe profesor
     //TO DO
+    hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] = 1;
+    
+    //Updatam ce vede
+    struct Vedere vedereNoua = getVedere();
+    
+    ///
+    // Trimitem la sclavi pozitiile, directia si noua vedere
+    ///
+    //TO DO
+    
+    ///
+    // Ne returneaza pozitiile care se potrivesc si facem o noua lista
+    ///
+    struct Pozitie pozitiiPosibileUpdatate[1000];
+    
+    //Daca noua list are 1 element, am gasit solutia
+    /*
+        return 1;
+     */
+    
+    //Incercam mutare
+    if(deplaseaza('f',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('b',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('l',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('r',vedereNoua,pozitiiPosibileUpdatate) == 0);
+    
+    //Resetam Patternul, o poate lua si pe aici acum
+    hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] = 0;
     
     return 0;
     
@@ -185,13 +234,17 @@ void master()
         }
     
     ///
-    // Retinem mutarile
+    // Il plimbam pe profesor prin padure
     ///
-    int stivaMutari[1000];
-    int nStivaMutari = 0;
-}
-
-void slave()
-{
+    hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] = 1;
+    if(deplaseaza('f',vedereCurenta,pozitiiPosibile) == 0)
+        if(deplaseaza('b',vedereCurenta,pozitiiPosibile) == 0)
+            if(deplaseaza('l',vedereCurenta,pozitiiPosibile) == 0)
+                if(deplaseaza('r',vedereCurenta,pozitiiPosibile) == 0);
+    
+    
+    
+    
+    
     
 }
