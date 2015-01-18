@@ -130,17 +130,13 @@ int deplaseaza(char directie, struct Pozitie pozitiiPosibile[])
     ///
     //TO DO
     
-    // Ne returneaza pozitiile care se potrivesc si refacem lista
-    //
-    // Obs! Nu trebuie sa retinem pozitiile eliminate in eventualitatea intoarcerii in recursivitate
-    // deoarece pozitiile eliminate nu pot fi solutii
     ///
+    // Ne returneaza pozitiile care se potrivesc si facem o noua lista
+    ///
+    struct Pozitie pozitiiPosibileUpdatate[1000];
     
     //Incercam mutare
-    if(deplaseaza('f') == 0) if(deplaseaza('b') == 0) if(deplaseaza('l') == 0) if(deplaseaza('r') == 0);
-    
-    //Daca ne blocam ne intoarcem
-    //TO DO
+    if(deplaseaza('f',pozitiiPosibileUpdatate) == 0) if(deplaseaza('b',pozitiiPosibileUpdatate) == 0) if(deplaseaza('l',pozitiiPosibileUpdatate) == 0) if(deplaseaza('r',pozitiiPosibileUpdatate) == 0);
     
     return 0;
     
