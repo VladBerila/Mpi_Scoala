@@ -24,6 +24,8 @@ struct Vedere
 {
     //T,C,O,R
     char fata, spate, stanga, dreapta;
+    //Doar pentru a ne ajuta sa nu intram in cicluri
+    int i,j;
 };
 
 struct Profesor
@@ -33,6 +35,7 @@ struct Profesor
 } profesor;
 
 int Harta[100][100];
+int hartaPatternMutari[100][100];
 int N,M;
 
 struct Pozitie pozitiiPosibile[10000];
@@ -101,16 +104,18 @@ struct Vedere getVedere()
         vedere.spate = Harta[i][j+1];
         vedere.stanga = Harta[i+1][j];
     }
+    vedere.i = i;
+    vedere.j = j;
     
     return vedere;
 }
 
 //directie = f,b,l,r
 //forward, back, left, right
-int deplaseaza(char directie, struct Pozitie pozitiiPosibile[])
+int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie pozitiiPosibile[])
 {
-    struct Vedere vedereCurenta = getVedere();
-    
+    if(hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] == 1)
+        return 0;
     //Nu il deplasam daca da de copac sau prapastie
     if( (directie == 'f' && (vedereCurenta.fata == 'T' || vedereCurenta.fata == 'C')) ||
        (directie == 'b' && (vedereCurenta.spate == 'T' || vedereCurenta.spate == 'C')) ||
@@ -121,6 +126,7 @@ int deplaseaza(char directie, struct Pozitie pozitiiPosibile[])
     
     //Il mutam pe profesor
     //TO DO
+    hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] = 1;
     
     //Updatam ce vede
     struct Vedere vedereNoua = getVedere();
@@ -135,8 +141,16 @@ int deplaseaza(char directie, struct Pozitie pozitiiPosibile[])
     ///
     struct Pozitie pozitiiPosibileUpdatate[1000];
     
+    //Daca noua list are 1 element, am gasit solutia
+    /*
+        return 1;
+     */
+    
     //Incercam mutare
-    if(deplaseaza('f',pozitiiPosibileUpdatate) == 0) if(deplaseaza('b',pozitiiPosibileUpdatate) == 0) if(deplaseaza('l',pozitiiPosibileUpdatate) == 0) if(deplaseaza('r',pozitiiPosibileUpdatate) == 0);
+    if(deplaseaza('f',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('b',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('l',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('r',vedereNoua,pozitiiPosibileUpdatate) == 0);
+    
+    //Resetam Patternul, o poate lua si pe aici acum
+    hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] = 0;
     
     return 0;
     
@@ -205,10 +219,11 @@ void master()
     ///
     // Il plimbam pe profesor prin padure
     ///
-    if(deplaseaza('f',pozitiiPosibile) == 0)
-        if(deplaseaza('b',pozitiiPosibile) == 0)
-            if(deplaseaza('l',pozitiiPosibile) == 0)
-                if(deplaseaza('r',pozitiiPosibile) == 0);
+    hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] = 1;
+    if(deplaseaza('f',vedereCurenta,pozitiiPosibile) == 0)
+        if(deplaseaza('b',vedereCurenta,pozitiiPosibile) == 0)
+            if(deplaseaza('l',vedereCurenta,pozitiiPosibile) == 0)
+                if(deplaseaza('r',vedereCurenta,pozitiiPosibile) == 0);
     
     
     
