@@ -37,12 +37,14 @@ struct Profesor
 int Harta[100][100];
 int hartaPatternMutari[100][100];
 int N,M;
+int dirI[4], dirJ[4];
 
 struct Pozitie pozitiiPosibile[10000];
 int nPozitiiPosibile = 0;
 
 void master();
 void slave();
+void computeOrientationVectors(char orientare);
 
 int main(int argc, char * argv[])
 {
@@ -65,6 +67,21 @@ int main(int argc, char * argv[])
     MPI_Finalize();
     
     return 0;
+}
+
+void computeOrientationVectors(char orientare)
+{
+    switch (orientare)
+    {
+        case 'N': dirI[0] = -1, dirI[1] = 1, dirI[2] = dirI[3] = 0, dirJ[0] = 0, dirJ[1] = 0, dirJ[2] = 1, dirJ[3] = -1;
+            break;
+        case 'S': dirI[0] = 1, dirI[1] = -1, dirI[2] = dirI[3] = 0, dirJ[0] = 0, dirJ[1] = 0, dirJ[2] = -1, dirJ[3] = 1;
+            break;
+        case 'E': dirI[0] = dirI[1] = 0, dirI[2] = 1, dirI[3] = -1, dirJ[0] = 1, dirJ[1] = -1, dirJ[2] = 0, dirJ[3] = 0;
+            break;
+        case 'V': dirI[0] = dirI[1] = 0, dirI[2] = -1, dirI[3] = 1, dirJ[0] = -1, dirJ[1] = 1, dirJ[2] = 0, dirJ[3] = 0;
+            break;
+    }
 }
 
 struct Vedere getVedere()
