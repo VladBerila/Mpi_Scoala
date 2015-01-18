@@ -42,7 +42,7 @@ int main(int argc, char * argv[])
 {
     
     // nr de procese
-    int nNumOfProcs, rank;
+    int nNumOfProcs, rank, numarPePrc;
     
     // insert code here...
     MPI_Init(&argc , &argv);
@@ -105,7 +105,7 @@ struct Vedere getVedere()
 void master()
 {
     struct Pozitie pozitiiPosibile[10000];
-    int capatStiva = 0;
+    int nPozitiiPosibile = 0;
     
     struct Vedere vedereCurenta = getVedere();
     
@@ -124,7 +124,7 @@ void master()
                 pozitie.j = j;
                 pozitie.iAnterior = -1;
                 pozitie.jAnterior = -1;
-                pozitiiPosibile[capatStiva++] = pozitie;
+                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
             }
             
             //Directia S
@@ -136,7 +136,7 @@ void master()
                 pozitie.j = j;
                 pozitie.iAnterior = -1;
                 pozitie.jAnterior = -1;
-                pozitiiPosibile[capatStiva++] = pozitie;
+                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
             }
             
             //Directia E
@@ -148,7 +148,7 @@ void master()
                 pozitie.j = j;
                 pozitie.iAnterior = -1;
                 pozitie.jAnterior = -1;
-                pozitiiPosibile[capatStiva++] = pozitie;
+                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
             }
             
             //Directia V
@@ -160,13 +160,14 @@ void master()
                 pozitie.j = j;
                 pozitie.iAnterior = -1;
                 pozitie.jAnterior = -1;
-                pozitiiPosibile[capatStiva++] = pozitie;
+                pozitiiPosibile[nPozitiiPosibile++] = pozitie;
             }
-
+            
         }
-}
-
-void slave()
-{
     
+    ///
+    // Retinem mutarile
+    ///
+    int stivaMutari[1000];
+    int nStivaMutari = 0; 
 }
