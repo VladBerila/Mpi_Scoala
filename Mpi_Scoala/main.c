@@ -84,7 +84,7 @@ void createMPIStruct()
     MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_pozitie_type);
     MPI_Type_commit(&mpi_pozitie_type);
     
-    //Vedere
+    //Vedere 
     const int nitems2=6;
     int          blocklengths2[6] = {1,1,1,1,1,1};
     MPI_Datatype types2[6] = {MPI_CHAR, MPI_CHAR, MPI_CHAR, MPI_CHAR, MPI_INT, MPI_INT};
