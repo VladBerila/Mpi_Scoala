@@ -65,7 +65,7 @@ void computeOrientationVectors(char orientare, int dirI[4], int dirJ[4]);
 void init();
 int checkMatch(struct Vedere vedere,int i, int j,char orientare);
 void sendToSlaveToCompute(int, struct Pozitie[], struct Vedere, char directie);
-void receiveFromSlave(struct Pozitie[], int*);
+void receiveFromSlaves(struct Pozitie[], int*);
 
 void createMPIStruct()
 {
@@ -223,7 +223,7 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     struct Pozitie pozitiiPosibileUpdatate[1000];
     int nNrPozPosibileUpdatate = 0;
     
-    receiveFromSlave(pozitiiPosibileUpdatate, &nNrPozPosibileUpdatate);
+    receiveFromSlaves(pozitiiPosibileUpdatate, &nNrPozPosibileUpdatate);
     
     //Daca noua list are 1 element, am gasit solutia
 
@@ -342,7 +342,7 @@ void sendToSlaveToCompute( int rank, struct Pozitie pozitii[], struct Vedere ved
     
 }
 
-void receiveFromSlave(struct Pozitie pozitii[], int* nPozitii)
+void receiveFromSlaves(struct Pozitie pozitii[], int* nPozitii)
 {
     
 }
