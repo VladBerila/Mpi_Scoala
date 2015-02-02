@@ -60,7 +60,7 @@ void computeOrientationVectors(char orientare, int dirI[4], int dirJ[4]);
 void init();
 int checkMatch(struct Vedere vedere,int i, int j,char orientare);
 void sendToSlaveToCompute(int, struct Pozitie[], struct Vedere, char directie);
-void receiveFromSlave(int, struct Pozitie[], int*);
+void receiveFromSlave(struct Pozitie[], int*);
 
 int main(int argc, char * argv[])
 {
@@ -180,15 +180,7 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     struct Pozitie pozitiiPosibileUpdatate[1000];
     int nNrPozPosibileUpdatate = 0;
     
-    for(int rank = 1; rank < nNumOfProcs; ++rank)
-    {
-        struct Pozitie pozDeLaSclav[1000];
-        int nNrPozDeLaSclav = 0;
-        receiveFromSlave(1, pozDeLaSclav, &nNrPozDeLaSclav);
-        
-        for( int j = 0; j < nNrPozDeLaSclav; ++j)
-            pozitiiPosibileUpdatate[nNrPozPosibileUpdatate++] = pozDeLaSclav[j];
-    }
+    receiveFromSlave(pozitiiPosibileUpdatate, &nNrPozPosibileUpdatate);
     
     //Daca noua list are 1 element, am gasit solutia
 
@@ -307,7 +299,7 @@ void sendToSlaveToCompute( int rank, struct Pozitie pozitii[], struct Vedere ved
     
 }
 
-void receiveFromSlave( int rank, struct Pozitie pozitii[], int* nPozitii)
+void receiveFromSlave(struct Pozitie pozitii[], int* nPozitii)
 {
     
 }
