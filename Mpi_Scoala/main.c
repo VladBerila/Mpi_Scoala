@@ -157,7 +157,7 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     // Trimitem la sclavi pozitiile, directia si noua vedere
     ///
 
-    int nNrCalculeSclav = nPozitiiPosibile / (nNumOfProcs - 1) + 1;
+    int nNrCalculeSclav = nPozitiiPosibile >= nNumOfProcs ? nPozitiiPosibile / (nNumOfProcs - 1) + 1 : nNumOfProcs;
     if(nPozitiiPosibile % ( nNumOfProcs - 1 ) == 0)
         nNrCalculeSclav--;
     
