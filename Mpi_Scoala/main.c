@@ -10,6 +10,7 @@
 #include <mpi.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 //Unde poate fi
 struct Pozitie
@@ -19,6 +20,8 @@ struct Pozitie
     int i,j;
     int iAnterior, jAnterior;
 };
+typedef struct Pozitie Pozitie_Type;
+MPI_Datatype mpi_pozitie_type;
 
 struct Vedere
 {
@@ -27,6 +30,8 @@ struct Vedere
     //Doar pentru a ne ajuta sa nu intram in cicluri
     int i,j;
 };
+typedef struct Vedere Vedere_Type;
+MPI_Datatype mpi_vedere_type;
 
 struct Profesor
 {
@@ -61,6 +66,40 @@ void init();
 int checkMatch(struct Vedere vedere,int i, int j,char orientare);
 void sendToSlaveToCompute(int, struct Pozitie[], struct Vedere, char directie);
 
+void createMPIStruct()
+{
+    //Pozitie
+    const int nitems=5;
+    int          blocklengths[5] = {1,1,1,1,1};
+    MPI_Datatype types[5] = {MPI_CHAR, MPI_INT, MPI_INT,MPI_INT, MPI_INT};
+    MPI_Aint     offsets[5];
+    
+    offsets[0] = offsetof(Pozitie_Type, directie);
+    offsets[1] = offsetof(Pozitie_Type, i);
+    offsets[2] = offsetof(Pozitie_Type, j);
+    offsets[3] = offsetof(Pozitie_Type, iAnterior);
+    offsets[4] = offsetof(Pozitie_Type, jAnterior);
+    
+    MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_pozitie_type);
+    MPI_Type_commit(&mpi_pozitie_type);
+    
+    //Vedere
+    const int nitems2=6;
+    int          blocklengths2[6] = {1,1,1,1,1,1};
+    MPI_Datatype types2[6] = {MPI_CHAR, MPI_CHAR, MPI_CHAR, MPI_CHAR, MPI_INT, MPI_INT};
+    MPI_Aint     offsets2[6];
+    
+    offsets2[0] = offsetof(Vedere_Type, fata);
+    offsets2[1] = offsetof(Vedere_Type, spate);
+    offsets2[2] = offsetof(Vedere_Type, stanga);
+    offsets2[3] = offsetof(Vedere_Type, dreapta);
+    offsets2[4] = offsetof(Vedere_Type, i);
+    offsets2[5] = offsetof(Vedere_Type, j);
+    
+    MPI_Type_create_struct(nitems2, blocklengths2, offsets2, types2, &mpi_vedere_type);
+    MPI_Type_commit(&mpi_vedere_type);
+}
+
 int main(int argc, char * argv[])
 {
     
@@ -71,11 +110,15 @@ int main(int argc, char * argv[])
     
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
+    createMPIStruct();
+    
     if(rank == 0)
         master();
     else
         slave();
-    
+
+    MPI_Type_free(&mpi_pozitie_type);
+    MPI_Type_free(&mpi_vedere_type);
     MPI_Finalize();
     
     return 0;
