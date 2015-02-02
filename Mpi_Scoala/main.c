@@ -158,7 +158,7 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     ///
 
     int nNrCalculeSclav = nPozitiiPosibile >= nNumOfProcs ? nPozitiiPosibile / (nNumOfProcs - 1) + 1 : nNumOfProcs;
-    if(nPozitiiPosibile % ( nNumOfProcs - 1 ) != 0)
+    if(nPozitiiPosibile % ( nNumOfProcs - 1 ) == 0)
         nNrCalculeSclav--;
     
     for(int rank = 1; rank < nNumOfProcs - 1; ++rank)
