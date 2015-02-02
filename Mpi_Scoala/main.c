@@ -47,6 +47,8 @@ int N,M;
  stanga = 3
  */
 int dirIProf[4], dirJProf[4];
+// nr de procese
+int nNumOfProcs, rank;
 
 
 struct Pozitie pozitiiPosibile[10000];
@@ -57,12 +59,10 @@ void slave();
 void computeOrientationVectors(char orientare, int dirI[4], int dirJ[4]);
 void init();
 int checkMatch(struct Vedere vedere,int i, int j,char orientare);
+void sendToSlaveToCompute(int, struct Pozitie[], struct Vedere, char directie);
 
 int main(int argc, char * argv[])
 {
-    
-    // nr de procese
-    int nNumOfProcs, rank, numarPePrc;
     
     // insert code here...
     MPI_Init(&argc , &argv);
@@ -156,7 +156,22 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     ///
     // Trimitem la sclavi pozitiile, directia si noua vedere
     ///
-    //TO DO
+
+    int nNrCalculeSclav = nPozitiiPosibile >= nNumOfProcs ? nPozitiiPosibile / (nNumOfProcs - 1) + 1 : nNumOfProcs;
+    if(nPozitiiPosibile % ( nNumOfProcs - 1 ) != 0)
+        nNrCalculeSclav--;
+    
+    for(int rank = 1; rank < nNumOfProcs - 1; ++rank)
+    {
+        struct Pozitie pozitiiPtSclav[1000];
+        
+        for(int j = 0; j < nNrCalculeSclav && j + nNrCalculeSclav * (rank - 1) < nPozitiiPosibile; ++j)
+        {
+            pozitiiPtSclav[j] = pozitiiPosibile[j + nNrCalculeSclav * (rank - 1)];
+        }
+        
+        sendToSlaveToCompute(rank, pozitiiPtSclav, vedereNoua, directie);
+    }
     
     ///
     // Ne returneaza pozitiile care se potrivesc si facem o noua lista
@@ -272,5 +287,10 @@ void master()
     
     
     
+    
+}
+
+void sendToSlaveToCompute( int rank, struct Pozitie pozitii[], struct Vedere vedere, char directie)
+{
     
 }
