@@ -161,7 +161,7 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     if(nPozitiiPosibile % ( nNumOfProcs - 1 ) == 0)
         nNrCalculeSclav--;
     
-    for(int rank = 1; rank < nNumOfProcs - 1; ++rank)
+    for(int rank = 1; rank < nNumOfProcs; ++rank)
     {
         struct Pozitie pozitiiPtSclav[1000];
         
