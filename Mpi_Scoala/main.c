@@ -65,6 +65,7 @@ void computeOrientationVectors(char orientare, int dirI[4], int dirJ[4]);
 void init();
 int checkMatch(struct Vedere vedere,int i, int j,char orientare);
 void sendToSlaveToCompute(int, struct Pozitie[], struct Vedere, char directie);
+void receiveFromSlave(int, struct Pozitie[], int*);
 
 void createMPIStruct()
 {
@@ -220,11 +221,22 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     // Ne returneaza pozitiile care se potrivesc si facem o noua lista
     ///
     struct Pozitie pozitiiPosibileUpdatate[1000];
+    int nNrPozPosibileUpdatate = 0;
+    
+    for(int rank = 1; rank < nNumOfProcs; ++rank)
+    {
+        struct Pozitie pozDeLaSclav[1000];
+        int nNrPozDeLaSclav = 0;
+        receiveFromSlave(1, pozDeLaSclav, &nNrPozDeLaSclav);
+        
+        for( int j = 0; j < nNrPozDeLaSclav; ++j)
+            pozitiiPosibileUpdatate[nNrPozPosibileUpdatate++] = pozDeLaSclav[j];
+    }
     
     //Daca noua list are 1 element, am gasit solutia
-    /*
+
+    if(nNrPozPosibileUpdatate == 1)
         return 1;
-     */
     
     //Incercam mutare
     if(deplaseaza('f',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('b',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('l',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('r',vedereNoua,pozitiiPosibileUpdatate) == 0);
@@ -334,6 +346,11 @@ void master()
 }
 
 void sendToSlaveToCompute( int rank, struct Pozitie pozitii[], struct Vedere vedere, char directie)
+{
+    
+}
+
+void receiveFromSlave( int rank, struct Pozitie pozitii[], int* nPozitii)
 {
     
 }
