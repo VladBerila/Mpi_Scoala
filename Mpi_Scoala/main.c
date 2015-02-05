@@ -357,9 +357,8 @@ void sendToSlaveToCompute( int rank, Pozitie pozitii[], Vedere vedere, char dire
 void receiveFromSlaves(Pozitie pozitii[], int* nPozitii)
 {
     
-}
 
 void slave()
 {
     
-}
+}}
