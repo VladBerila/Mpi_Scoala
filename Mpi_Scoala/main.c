@@ -13,31 +13,29 @@
 #include <stddef.h>
 
 //Unde poate fi
-struct Pozitie
+typedef struct Pozitie_struct
 {
     //N,E,S,V
     char directie;
     int i,j;
     int iAnterior, jAnterior;
-};
-typedef struct Pozitie Pozitie_Type;
-MPI_Datatype mpi_pozitie_type;
+} Pozitie;
+MPI_Datatype mpi_pozitie;
 
-struct Vedere
+typedef struct Vedere_struct
 {
     //T,C,O,R
     char fata, spate, stanga, dreapta;
     //Doar pentru a ne ajuta sa nu intram in cicluri
     int i,j;
-};
-typedef struct Vedere Vedere_Type;
-MPI_Datatype mpi_vedere_type;
+} Vedere;
+MPI_Datatype mpi_vedere;
 
-struct Profesor
+typedef struct Profesor_struct
 {
     int i,j;
     char directie;
-} profesor;
+} Profesor;
 
 char Harta[100][100];
 int hartaPatternMutari[100][100];
@@ -56,16 +54,16 @@ int dirIProf[4], dirJProf[4];
 int nNumOfProcs, rank;
 
 
-struct Pozitie pozitiiPosibile[10000];
+Pozitie pozitiiPosibile[10000];
 int nPozitiiPosibile = 0;
 
 void master();
 void slave();
 void computeOrientationVectors(char orientare, int dirI[4], int dirJ[4]);
 void init();
-int checkMatch(struct Vedere vedere,int i, int j,char orientare);
-void sendToSlaveToCompute(int, struct Pozitie[], struct Vedere, char directie);
-void receiveFromSlave(int, struct Pozitie[], int*);
+int checkMatch( Vedere vedere,int i, int j,char orientare);
+void sendToSlaveToCompute(int, Pozitie[], Vedere, char directie);
+void receiveFromSlaves( Pozitie[], int*);
 
 void createMPIStruct()
 {
@@ -75,14 +73,14 @@ void createMPIStruct()
     MPI_Datatype types[5] = {MPI_CHAR, MPI_INT, MPI_INT,MPI_INT, MPI_INT};
     MPI_Aint     offsets[5];
     
-    offsets[0] = offsetof(Pozitie_Type, directie);
-    offsets[1] = offsetof(Pozitie_Type, i);
-    offsets[2] = offsetof(Pozitie_Type, j);
-    offsets[3] = offsetof(Pozitie_Type, iAnterior);
-    offsets[4] = offsetof(Pozitie_Type, jAnterior);
+    offsets[0] = offsetof(Pozitie, directie);
+    offsets[1] = offsetof(Pozitie, i);
+    offsets[2] = offsetof(Pozitie, j);
+    offsets[3] = offsetof(Pozitie, iAnterior);
+    offsets[4] = offsetof(Pozitie, jAnterior);
     
-    MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_pozitie_type);
-    MPI_Type_commit(&mpi_pozitie_type);
+    MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_pozitie);
+    MPI_Type_commit(&mpi_pozitie);
     
     //Vedere
     const int nitems2=6;
@@ -90,15 +88,15 @@ void createMPIStruct()
     MPI_Datatype types2[6] = {MPI_CHAR, MPI_CHAR, MPI_CHAR, MPI_CHAR, MPI_INT, MPI_INT};
     MPI_Aint     offsets2[6];
     
-    offsets2[0] = offsetof(Vedere_Type, fata);
-    offsets2[1] = offsetof(Vedere_Type, spate);
-    offsets2[2] = offsetof(Vedere_Type, stanga);
-    offsets2[3] = offsetof(Vedere_Type, dreapta);
-    offsets2[4] = offsetof(Vedere_Type, i);
-    offsets2[5] = offsetof(Vedere_Type, j);
+    offsets2[0] = offsetof(Vedere, fata);
+    offsets2[1] = offsetof(Vedere, spate);
+    offsets2[2] = offsetof(Vedere, stanga);
+    offsets2[3] = offsetof(Vedere, dreapta);
+    offsets2[4] = offsetof(Vedere, i);
+    offsets2[5] = offsetof(Vedere, j);
     
-    MPI_Type_create_struct(nitems2, blocklengths2, offsets2, types2, &mpi_vedere_type);
-    MPI_Type_commit(&mpi_vedere_type);
+    MPI_Type_create_struct(nitems2, blocklengths2, offsets2, types2, &mpi_vedere);
+    MPI_Type_commit(&mpi_vedere);
 }
 
 int main(int argc, char * argv[])
@@ -128,8 +126,8 @@ int main(int argc, char * argv[])
         slave();
      */
 
-    MPI_Type_free(&mpi_pozitie_type);
-    MPI_Type_free(&mpi_vedere_type);
+    MPI_Type_free(&mpi_pozitie);
+    MPI_Type_free(&mpi_vedere);
     MPI_Finalize();
     
     return 0;
@@ -162,9 +160,9 @@ void computeOrientationVectors(char orientare, int dirI[4], int dirJ[4])
     }
 }
 
-struct Vedere getVedere()
+Vedere getVedere()
 {
-    struct Vedere vedere;
+    Vedere vedere;
     int i = profesor.i;
     int j = profesor.j;
 
@@ -191,7 +189,7 @@ void MoveProfessor(char directie)
 
 //directie = f,b,l,r
 //forward, back, left, right
-int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie pozitiiPosibile[])
+int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
 {
     if(hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] == 1)
         return 0;
@@ -209,7 +207,7 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] = 1;
     
     //Updatam ce vede
-    struct Vedere vedereNoua = getVedere();
+    Vedere vedereNoua = getVedere();
     
     ///
     // Trimitem la sclavi pozitiile, directia si noua vedere
@@ -221,7 +219,7 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     
     for(int rank = 1; rank < nNumOfProcs; ++rank)
     {
-        struct Pozitie pozitiiPtSclav[1000];
+        Pozitie pozitiiPtSclav[1000];
         
         for(int j = 0; j < nNrCalculeSclav && j + nNrCalculeSclav * (rank - 1) < nPozitiiPosibile; ++j)
         {
@@ -234,18 +232,10 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     ///
     // Ne returneaza pozitiile care se potrivesc si facem o noua lista
     ///
-    struct Pozitie pozitiiPosibileUpdatate[1000];
+    Pozitie pozitiiPosibileUpdatate[1000];
     int nNrPozPosibileUpdatate = 0;
     
-    for(int rank = 1; rank < nNumOfProcs; ++rank)
-    {
-        struct Pozitie pozDeLaSclav[1000];
-        int nNrPozDeLaSclav = 0;
-        receiveFromSlave(1, pozDeLaSclav, &nNrPozDeLaSclav);
-        
-        for( int j = 0; j < nNrPozDeLaSclav; ++j)
-            pozitiiPosibileUpdatate[nNrPozPosibileUpdatate++] = pozDeLaSclav[j];
-    }
+    receiveFromSlaves(pozitiiPosibileUpdatate, &nNrPozPosibileUpdatate);
     
     //Daca noua list are 1 element, am gasit solutia
 
@@ -266,9 +256,9 @@ int deplaseaza(char directie, struct Vedere vedereCurenta, struct Pozitie poziti
     
 }
 
-int checkMatch(struct Vedere vedere,int i, int j,char orientare)
+int checkMatch(Vedere vedere,int i, int j,char orientare)
 {
-    struct Vedere vedereCurenta = vedere;
+    Vedere vedereCurenta = vedere;
     int dirI[4], dirJ[4];
     
     computeOrientationVectors(orientare, dirI, dirJ);
@@ -285,7 +275,7 @@ int checkMatch(struct Vedere vedere,int i, int j,char orientare)
 
 void master()
 {
-    struct Vedere vedereCurenta = getVedere();
+    Vedere vedereCurenta = getVedere();
     
     ///
     // Gasim pozitiile initiale posibile
@@ -296,7 +286,7 @@ void master()
             //Directia N
             if(checkMatch(vedereCurenta,i,j,'N'))
             {
-                struct Pozitie pozitie;
+                Pozitie pozitie;
                 pozitie.directie = 'N';
                 pozitie.i = i;
                 pozitie.j = j;
@@ -308,7 +298,7 @@ void master()
             //Directia S
             if(checkMatch(vedereCurenta,i,j,'S'))
             {
-                struct Pozitie pozitie;
+                Pozitie pozitie;
                 pozitie.directie = 'S';
                 pozitie.i = i;
                 pozitie.j = j;
@@ -320,7 +310,7 @@ void master()
             //Directia E
             if(checkMatch(vedereCurenta,i,j,'E'))
             {
-                struct Pozitie pozitie;
+                Pozitie pozitie;
                 pozitie.directie = 'E';
                 pozitie.i = i;
                 pozitie.j = j;
@@ -332,7 +322,7 @@ void master()
             //Directia V
             if(checkMatch(vedereCurenta,i,j,'V'))
             {
-                struct Pozitie pozitie;
+                Pozitie pozitie;
                 pozitie.directie = 'V';
                 pozitie.i = i;
                 pozitie.j = j;
@@ -359,12 +349,17 @@ void master()
     
 }
 
-void sendToSlaveToCompute( int rank, struct Pozitie pozitii[], struct Vedere vedere, char directie)
+void sendToSlaveToCompute( int rank, Pozitie pozitii[], Vedere vedere, char directie)
 {
     
 }
 
-void receiveFromSlave( int rank, struct Pozitie pozitii[], int* nPozitii)
+void receiveFromSlaves(Pozitie pozitii[], int* nPozitii)
+{
+    
+}
+
+void slave()
 {
     
 }
