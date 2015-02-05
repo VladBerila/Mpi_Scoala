@@ -291,6 +291,9 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
 
 int checkMatch(Vedere vedere,int i, int j,char orientare)
 {
+    if(Harta[i][j] != 'O' && Harta[i][j] != 'R')
+        return 0;
+    
     Vedere vedereCurenta = vedere;
     int dirI[4], dirJ[4];
     

@@ -4,4 +4,4 @@ C O C T T
 C O C O C
 T O T O T
 C O T O T
-2 1 N
+2 2 N
