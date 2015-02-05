@@ -138,7 +138,7 @@ void init()
 {
     // citire din fisier
     // TO DO
-    FILE *fp = fopen("Untitled/Users/vladberila/Documents/Dev/Mpi_Scoala/Mpi_Scoala/harta.txt", "r");
+    FILE *fp = fopen("/Users/vladberila/Documents/Dev/Mpi_Scoala/Mpi_Scoala/harta.txt", "r");
     if(fp == NULL)
         exit(7);
     fscanf(fp, "%d %d", &N, &M);
