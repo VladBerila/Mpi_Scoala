@@ -142,7 +142,10 @@ void init()
     FILE *fp = fopen("harta.txt", "r");
     if(fp == NULL)
         exit(7);
-    fscanf(fp, "%d %d", &N, &M);
+    fscanf(fp, "%d", &N);
+    fscanf(fp, "%d", &M);
+    
+    printf("%d",N);
     
     computeOrientationVectors(profesor.directie, dirIProf, dirJProf);
 }

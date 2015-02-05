@@ -23,6 +23,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2C00F5F81A83AF5600671E92 /* harta.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = harta.txt; sourceTree = "<group>"; };
 		E29FA8251A0ABB2400659D4E /* Mpi_Scoala */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Mpi_Scoala; sourceTree = BUILT_PRODUCTS_DIR; };
 		E29FA8281A0ABB2400659D4E /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -58,6 +59,7 @@
 			isa = PBXGroup;
 			children = (
 				E29FA8281A0ABB2400659D4E /* main.c */,
+				2C00F5F81A83AF5600671E92 /* harta.txt */,
 			);
 			path = Mpi_Scoala;
 			sourceTree = "<group>";
@@ -208,6 +210,7 @@
 					/usr/local/include,
 				);
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				OTHER_LDFLAGS = (
 					"-lm",
 					"-lmpi",
@@ -225,6 +228,7 @@
 					/usr/local/include,
 				);
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				OTHER_LDFLAGS = (
 					"-lm",
 					"-lmpi",
