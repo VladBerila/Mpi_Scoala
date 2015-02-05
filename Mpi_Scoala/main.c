@@ -120,12 +120,10 @@ int main(int argc, char * argv[])
     MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&M, 1, MPI_INT, 0, MPI_COMM_WORLD);
     
-    /*
-     if(rank == 0)
-     master();
-     else
-     slave();
-     */
+    if(rank == 0)
+        master();
+    else
+        slave();
     
     MPI_Type_free(&mpi_pozitie);
     MPI_Type_free(&mpi_vedere);
@@ -138,10 +136,12 @@ void init()
 {
     // citire din fisier
     // TO DO
-    FILE *fp = fopen("/Users/vladberila/Documents/Dev/Mpi_Scoala/Mpi_Scoala/harta.txt", "r");
+    FILE *fp = fopen("/Users/beckslash/C++/Gitu/Mpi_Scoala/harta.txt", "r");
     if(fp == NULL)
         exit(7);
     fscanf(fp, "%d %d", &N, &M);
+    
+    char c;
     
     for(int i = 0; i <= N + 1; i++)
         Harta[i][0] = Harta[i][M + 1] = 'T';
@@ -152,7 +152,6 @@ void init()
     for(int i = 1 ; i <= N; i++)
         for(int j = 1; j <= M; j++)
         {
-            char c;
             fscanf(fp, "%c", &c);
             if(c != ' ' && c!= '\n')
                 Harta[i][j] = c;
@@ -161,7 +160,10 @@ void init()
             printf("%c",Harta[i][j]);
         }
     
-    fscanf(fp, "%d %d %c", &profesor.i, &profesor.j, &profesor.directie);
+    fscanf(fp, "%d %d", &profesor.i, &profesor.j);
+    fscanf(fp,"%c", &c);
+    fscanf(fp,"%c", &profesor.directie);
+    
     
     fclose(fp);
     
@@ -363,6 +365,8 @@ void master()
             }
             
         }
+    
+    printf("%d\n",nPozitiiPosibile);
     
     ///
     // Il plimbam pe profesor prin padure
