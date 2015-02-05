@@ -65,6 +65,7 @@ void init();
 int checkMatch( Vedere vedere,int i, int j,char orientare);
 void sendToSlaveToCompute(int, Pozitie[], int, Vedere);
 void receiveFromSlaves( Pozitie[], int*);
+void stopSlaves();
 
 void createMPIStruct()
 {
@@ -270,6 +271,7 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
     
     if(nNrPozPosibileUpdatate == 1)
     {
+        stopSlaves();
         Pozitie p = pozitiiPosibileUpdatate[0];
         printf("%d %d %c",p.i,p.j,p.directie);
         return 1;
@@ -394,6 +396,15 @@ void master()
     
 }
 
+void stopSlaves()
+{
+    for(int rank = 1; rank < nNumOfProcs; ++rank)
+    {
+        int n = -321;
+        MPI_Send(&n, 1, MPI_INT, rank, 0, MPI_COMM_WORLD);
+    }
+}
+
 void sendToSlaveToCompute( int rank, Pozitie pozitii[], int nNrPozitiiToCompute, Vedere vedere)
 {
     MPI_Send(&nNrPozitiiToCompute, 1, MPI_INT, rank, 0, MPI_COMM_WORLD);
@@ -433,12 +444,14 @@ void slave()
     
     MPI_Status st;
     
-    int dirI[4], dirJ[4];
-    
     while(1)
     {
         nPozitiiDeReturnat = 0;
         MPI_Recv(&nPozitii, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &st);
+        
+        if(nPozitii == -321)
+            break;
+        
         if(st.MPI_ERROR != MPI_SUCCESS)
             printf("Primu in slaves");
         MPI_Recv(&pozitiiDeProcesat, nPozitii, mpi_pozitie, 0, 1, MPI_COMM_WORLD, &st);
