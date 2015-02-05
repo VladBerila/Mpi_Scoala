@@ -137,7 +137,7 @@ void init()
 {
     // citire din fisier
     // TO DO
-    FILE *fp = fopen("/Users/vladberila/Documents/Dev/Mpi_Scoala/Mpi_Scoala/harta.txt", "r");
+    FILE *fp = fopen("/Users/beckslash/C++/Gitu/Mpi_Scoala/harta.txt", "r");
     if(fp == NULL)
         exit(7);
     fscanf(fp, "%d %d", &N, &M);
@@ -158,7 +158,7 @@ void init()
                 Harta[i][j] = c;
             else
                 j--;
-//            printf("%c",Harta[i][j]);
+            //            printf("%c",Harta[i][j]);
         }
     
     fscanf(fp, "%d %d", &profesor.i, &profesor.j);
@@ -212,7 +212,7 @@ void MoveProfessor(char directie)
         case 'l' : profesor.i += dirIProf[3], profesor.j += dirJProf[3]; break;
     }
     
-//    printf("Profesor mutat\n");
+    //    printf("Profesor mutat\n");
 }
 
 //directie = f,b,l,r
@@ -275,11 +275,12 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
     
     //Daca noua list are 1 element, am gasit solutia
     
+    printf("Primite inapoi: %d\n", nNrPozPosibileUpdatate);
     if(nNrPozPosibileUpdatate == 1)
     {
         stopSlaves();
         Pozitie p = pozitiiPosibileUpdatate[0];
-        printf("%d %d %c",p.i,p.j,p.directie);
+        printf("Profesorul este: %d %d %c",p.i,p.j,p.directie);
         return 1;
     }
     
@@ -319,18 +320,14 @@ int checkMatch(Vedere vedere,int i, int j,char orientare)
 
 int checkMatchCuDeplasare(Vedere vedere, Pozitie pozitie, char directie)
 {
-    Pozitie NouaPozitie = pozitie;
-    
     int dirI[4], dirJ[4];
-    
     computeOrientationVectors(pozitie.directie, dirI, dirJ);
-    
     switch (directie)
     {
-        case 'f' : NouaPozitie.i += dirI[0], NouaPozitie.j += dirJ[0]; break;
-        case 'b' : NouaPozitie.i += dirI[1], NouaPozitie.j += dirJ[1]; break;
-        case 'r' : NouaPozitie.i += dirI[2], NouaPozitie.j += dirJ[2]; break;
-        case 'l' : NouaPozitie.i += dirI[3], NouaPozitie.j += dirJ[3]; break;
+        case 'f' : pozitie.i += dirI[0], pozitie.j += dirJ[0]; break;
+        case 'b' : pozitie.i += dirI[1], pozitie.j += dirJ[1]; break;
+        case 'r' : pozitie.i += dirI[2], pozitie.j += dirJ[2]; break;
+        case 'l' : pozitie.i += dirI[3], pozitie.j += dirJ[3]; break;
     }
     return checkMatch(vedere, pozitie.i, pozitie.j, pozitie.directie);
 }
@@ -339,7 +336,7 @@ void master()
 {
     Vedere vedereCurenta = getVedere();
     
-//    printf("%d %d %c",profesor.i,profesor.j,profesor.directie);
+    //    printf("%d %d %c",profesor.i,profesor.j,profesor.directie);
     
     ///
     // Gasim pozitiile initiale posibile
@@ -442,7 +439,7 @@ void sendToSlaveToCompute( int rank, Pozitie pozitii[], int nNrPozitiiToCompute,
     printf("Vdere trimisa: %c %c %c %c %d %d\n",vedere.fata,vedere.spate,vedere.stanga,vedere.dreapta,vedere.i,vedere.j);
     
     MPI_Send(&nNrPozitiiToCompute, 1, MPI_INT, rank, 0, MPI_COMM_WORLD);
-  //    MPI_Send(&pozitii, nNrPozitiiToCompute, mpi_pozitie, rank, 1, MPI_COMM_WORLD);
+    //    MPI_Send(&pozitii, nNrPozitiiToCompute, mpi_pozitie, rank, 1, MPI_COMM_WORLD);
     int I[1000],J[1000];
     char C[1000];
     for(int i=0; i < nNrPozitiiToCompute; i++)
@@ -454,8 +451,8 @@ void sendToSlaveToCompute( int rank, Pozitie pozitii[], int nNrPozitiiToCompute,
     MPI_Send(&I, nNrPozitiiToCompute, MPI_INT, rank, 10, MPI_COMM_WORLD);
     MPI_Send(&J, nNrPozitiiToCompute, MPI_INT, rank, 11, MPI_COMM_WORLD);
     MPI_Send(&C, nNrPozitiiToCompute, MPI_CHAR, rank, 12, MPI_COMM_WORLD);
-
-//    MPI_Send(&vedere, 1, mpi_vedere, rank, 2, MPI_COMM_WORLD);
+    
+    //    MPI_Send(&vedere, 1, mpi_vedere, rank, 2, MPI_COMM_WORLD);
     MPI_Send(&(vedere.fata), 1, MPI_CHAR, rank, 20, MPI_COMM_WORLD);
     MPI_Send(&(vedere.spate), 1, MPI_CHAR, rank, 21, MPI_COMM_WORLD);
     MPI_Send(&(vedere.stanga), 1, MPI_CHAR, rank, 22, MPI_COMM_WORLD);
@@ -476,16 +473,33 @@ void receiveFromSlaves(Pozitie pozitii[], int* nPozitii)
     
     for(int rank = 1; rank < nNumOfProcs; ++rank)
     {
+        printf("Astept de la sclavul %d\n",rank);
+        
         nPozitiiDePrimit = 0;
         MPI_Recv(&nPozitiiDePrimit, 1, MPI_INT, rank, 0, MPI_COMM_WORLD, &st);
         if(st.MPI_ERROR != MPI_SUCCESS)
             printf("Primu in receiveFromSlaves");
-        MPI_Recv(&pozitiiDePrimit, nPozitiiDePrimit, mpi_pozitie, 0, 1, MPI_COMM_WORLD, &st);
+        
+        //MPI_Recv(&pozitiiDePrimit, nPozitiiDePrimit, mpi_pozitie, 0, 1, MPI_COMM_WORLD, &st);
+        int I[1000],J[1000];
+        char C[1000];
+        MPI_Recv(&I, nPozitiiDePrimit, MPI_INT, rank, 10, MPI_COMM_WORLD, &st);
+        MPI_Recv(&J, nPozitiiDePrimit, MPI_INT, rank, 11, MPI_COMM_WORLD, &st);
+        MPI_Recv(&C, nPozitiiDePrimit, MPI_CHAR, rank, 12, MPI_COMM_WORLD, &st);
+        for(int i=0; i < nPozitiiDePrimit; i++)
+        {
+            pozitiiDePrimit[i].i = I[i];
+            pozitiiDePrimit[i].j = J[i];
+            pozitiiDePrimit[i].directie = C[i];
+        }
+        
         if(st.MPI_ERROR != MPI_SUCCESS)
             printf("Al doilea in receiveFromSlaves");
         
         for(int j = 0; j < nPozitiiDePrimit; ++j)
             pozitii[(*nPozitii)++] = pozitiiDePrimit[j];
+        
+        printf("Poz primite de la sclavul %d: %d\n",rank,nPozitiiDePrimit);
     }
 }
 
@@ -499,10 +513,10 @@ void slave()
     
     MPI_Status st;
     
-//    printf("Sclav\n");
+    //    printf("Sclav\n");
     while(1)
     {
-//        printf("Intru in while\n");
+        //        printf("Intru in while\n");
         nPozitiiDeReturnat = 0;
         MPI_Recv(&nPozitii, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &st);
         
@@ -511,8 +525,8 @@ void slave()
         if(nPozitii == -321)
             break;
         
-//        if(st.MPI_ERROR != MPI_SUCCESS)
-//            printf("Primu in slaves");
+        //        if(st.MPI_ERROR != MPI_SUCCESS)
+        //            printf("Primu in slaves");
         
         //MPI_Recv(&pozitiiDeProcesat, nPozitii, mpi_pozitie, 0, 1, MPI_COMM_WORLD, &st);
         int I[1000],J[1000];
@@ -526,10 +540,10 @@ void slave()
             pozitiiDeProcesat[i].j = J[i];
             pozitiiDeProcesat[i].directie = C[i];
         }
-
-//        if(st.MPI_ERROR != MPI_SUCCESS)
-//            printf("Al doilea in slaves");
-
+        
+        //        if(st.MPI_ERROR != MPI_SUCCESS)
+        //            printf("Al doilea in slaves");
+        
         //MPI_Recv(&vedere, 1, mpi_vedere, 0, 2, MPI_COMM_WORLD, &st);
         MPI_Recv(&(vedere.fata), 1, MPI_CHAR, 0, 20, MPI_COMM_WORLD, &st);
         MPI_Recv(&(vedere.spate), 1, MPI_CHAR, 0, 21, MPI_COMM_WORLD, &st);
@@ -537,26 +551,35 @@ void slave()
         MPI_Recv(&(vedere.dreapta), 1, MPI_CHAR, 0, 23, MPI_COMM_WORLD, &st);
         MPI_Recv(&(vedere.i), 1, MPI_INT, 0, 24, MPI_COMM_WORLD, &st);
         MPI_Recv(&(vedere.j), 1, MPI_INT, 0, 25, MPI_COMM_WORLD, &st);
-
+        
         MPI_Recv(&directie, 1, MPI_CHAR, 0, 3, MPI_COMM_WORLD, &st);
         
-//        if(st.MPI_ERROR != MPI_SUCCESS)
-//            printf("Al treilea in slaves");
+        //        if(st.MPI_ERROR != MPI_SUCCESS)
+        //            printf("Al treilea in slaves");
         
         printf("S %d: Vdere primita: %c %c %c %c %d %d\n",rank,vedere.fata,vedere.spate,vedere.stanga,vedere.dreapta,vedere.i,vedere.j);
-    
+        
         for(int i=0; i < nPozitii; i++)
         {
             Pozitie p = pozitiiDeProcesat[i];
             printf("S %d: %d %d %c\n",rank,p.i,p.j,p.directie);
-        
+            
             if(checkMatchCuDeplasare(vedere, p, directie))
                 pozitiiDeReturnat[nPozitiiDeReturnat++] = p;
         }
         
         printf("S %d: Pozitii inca bune: %d\n",rank,nPozitiiDeReturnat);
-    
+        
         MPI_Send(&nPozitiiDeReturnat, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-        MPI_Send(&pozitiiDeReturnat, nPozitiiDeReturnat, mpi_pozitie, 0, 1, MPI_COMM_WORLD);
+//        MPI_Send(&pozitiiDeReturnat, nPozitiiDeReturnat, mpi_pozitie, 0, 1, MPI_COMM_WORLD);
+        for(int i=0; i < nPozitiiDeReturnat; i++)
+        {
+            I[i] = pozitiiDeReturnat[i].i;
+            J[i] = pozitiiDeReturnat[i].j;
+            C[i] = pozitiiDeReturnat[i].directie;
+        }
+        MPI_Send(&I, nPozitiiDeReturnat, MPI_INT, 0, 10, MPI_COMM_WORLD);
+        MPI_Send(&J, nPozitiiDeReturnat, MPI_INT, 0, 11, MPI_COMM_WORLD);
+        MPI_Send(&C, nPozitiiDeReturnat, MPI_CHAR, 0, 12, MPI_COMM_WORLD);
     }
 }
