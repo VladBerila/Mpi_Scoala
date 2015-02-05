@@ -317,7 +317,7 @@ int checkMatch(Vedere vedere,int i, int j,char orientare)
     return 0;
 }
 
-int checkMatchCuDeplasare(Vedere vedere, Pozitie pozitie, char directie);
+int checkMatchCuDeplasare(Vedere vedere, Pozitie pozitie, char directie)
 {
     return 0;
 }
