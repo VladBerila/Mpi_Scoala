@@ -37,7 +37,8 @@ typedef struct Profesor_struct
     char directie;
 } Profesor;
 
-char Harta[100][100];
+Profesor profesor;
+int Harta[100][100];
 int hartaPatternMutari[100][100];
 int N,M;
 
@@ -120,12 +121,12 @@ int main(int argc, char * argv[])
     MPI_Bcast(&M, 1, MPI_INT, 0, MPI_COMM_WORLD);
     
     /*
-    if(rank == 0)
-        master();
-    else
-        slave();
+     if(rank == 0)
+     master();
+     else
+     slave();
      */
-
+    
     MPI_Type_free(&mpi_pozitie);
     MPI_Type_free(&mpi_vedere);
     MPI_Finalize();
@@ -165,7 +166,7 @@ Vedere getVedere()
     Vedere vedere;
     int i = profesor.i;
     int j = profesor.j;
-
+    
     vedere.fata = Harta[i + dirIProf[0]][j + dirJProf[0]];
     vedere.spate = Harta[i + dirIProf[1]][j + dirJProf[1]];
     vedere.dreapta = Harta[i + dirIProf[2]][j + dirJProf[2]];
@@ -212,7 +213,7 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
     ///
     // Trimitem la sclavi pozitiile, directia si noua vedere
     ///
-
+    
     int nNrCalculeSclav = nPozitiiPosibile >= nNumOfProcs ? nPozitiiPosibile / (nNumOfProcs - 1) + 1 : nNumOfProcs;
     if(nPozitiiPosibile % ( nNumOfProcs - 1 ) == 0)
         nNrCalculeSclav--;
@@ -238,7 +239,7 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
     receiveFromSlaves(pozitiiPosibileUpdatate, &nNrPozPosibileUpdatate);
     
     //Daca noua list are 1 element, am gasit solutia
-
+    
     if(nNrPozPosibileUpdatate == 1)
         return 1;
     
@@ -268,7 +269,7 @@ int checkMatch(Vedere vedere,int i, int j,char orientare)
        && vedereCurenta.spate == Harta[i + dirI[1]][j + dirJ[1]]
        && vedereCurenta.stanga == Harta[i + dirI[3]][j + dirJ[3]])
         return 1;
-
+    
     
     return 0;
 }
@@ -318,7 +319,7 @@ void master()
                 pozitie.jAnterior = -1;
                 pozitiiPosibile[nPozitiiPosibile++] = pozitie;
             }
-
+            
             //Directia V
             if(checkMatch(vedereCurenta,i,j,'V'))
             {
@@ -357,8 +358,9 @@ void sendToSlaveToCompute( int rank, Pozitie pozitii[], Vedere vedere, char dire
 void receiveFromSlaves(Pozitie pozitii[], int* nPozitii)
 {
     
+}
 
 void slave()
 {
     
-}}
+}
