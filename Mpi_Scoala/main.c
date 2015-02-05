@@ -113,7 +113,6 @@ int main(int argc, char * argv[])
     
     createMPIStruct();
     
-    
     if(rank == 0)
         init();
     
@@ -211,6 +210,8 @@ void MoveProfessor(char directie)
         case 'r' : profesor.i += dirIProf[2], profesor.j += dirJProf[2]; break;
         case 'l' : profesor.i += dirIProf[3], profesor.j += dirJProf[3]; break;
     }
+    
+    printf("Profesor mutat\n");
 }
 
 //directie = f,b,l,r
@@ -373,12 +374,14 @@ void master()
             
         }
     
-    //printf("%d\n",nPozitiiPosibile);
+    printf("\n%d\n",nPozitiiPosibile);
     for(int i=0;i<nPozitiiPosibile;i++)
     {
         Pozitie p = pozitiiPosibile[i];
         printf("\n%d %d %c",p.i,p.j,p.directie);
     }
+    
+    printf("fdsdfs");
     
     ///
     // Il plimbam pe profesor prin padure
@@ -444,8 +447,10 @@ void slave()
     
     MPI_Status st;
     
+    printf("\nSclav");
     while(1)
     {
+        printf("\Intru in while");
         nPozitiiDeReturnat = 0;
         MPI_Recv(&nPozitii, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &st);
         
