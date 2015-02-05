@@ -319,7 +319,17 @@ int checkMatch(Vedere vedere,int i, int j,char orientare)
 
 int checkMatchCuDeplasare(Vedere vedere, Pozitie pozitie, char directie)
 {
-    return 0;
+    Pozitie NouaPozitie = pozitie;
+    
+    switch (directie)
+    {
+        case 'f' : NouaPozitie.i += dirIProf[0], NouaPozitie.j += dirJProf[0]; break;
+        case 'b' : NouaPozitie.i += dirIProf[1], NouaPozitie.j += dirJProf[1]; break;
+        case 'r' : NouaPozitie.i += dirIProf[2], NouaPozitie.j += dirJProf[2]; break;
+        case 'l' : NouaPozitie.i += dirIProf[3], NouaPozitie.j += dirJProf[3]; break;
+    }
+    
+    return checkMatch(vedere, NouaPozitie.i, NouaPozitie.j, pozitie.directie);
 }
 
 void master()
