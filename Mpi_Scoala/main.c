@@ -482,7 +482,7 @@ void slave()
         nPozitiiDeReturnat = 0;
         MPI_Recv(&nPozitii, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &st);
         
-        printf("S: Nr pozitii de procesat: %d\n", nPozitii);
+        printf("S %d: Nr pozitii de procesat: %d\n", rank, nPozitii);
         
         if(nPozitii == -321)
             break;
@@ -521,13 +521,13 @@ void slave()
         for(int i=0; i < nPozitii; i++)
         {
             Pozitie p = pozitiiDeProcesat[i];
-            printf("S: %d %d %c\n",p.i,p.j,p.directie);
+            printf("S %d: %d %d %c\n",rank,p.i,p.j,p.directie);
         
             if(checkMatch(vedere, p.i, p.j, p.directie))
                 pozitiiDeReturnat[nPozitiiDeReturnat++] = p;
         }
         
-        printf("S: Pozitii inca bune: %d\n",nPozitiiDeReturnat);
+        printf("S %d: Pozitii inca bune: %d\n",rank,nPozitiiDeReturnat);
     
         MPI_Send(&nPozitiiDeReturnat, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
         MPI_Send(&pozitiiDeReturnat, nPozitiiDeReturnat, mpi_pozitie, 0, 1, MPI_COMM_WORLD);
