@@ -63,7 +63,7 @@ void slave();
 void computeOrientationVectors(char orientare, int dirI[4], int dirJ[4]);
 void init();
 int checkMatch( Vedere vedere,int i, int j,char orientare);
-void sendToSlaveToCompute(int, Pozitie[], Vedere, char directie);
+void sendToSlaveToCompute(int, Pozitie[], int, Vedere);
 void receiveFromSlaves( Pozitie[], int*);
 
 void createMPIStruct()
@@ -218,16 +218,20 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
     if(nPozitiiPosibile % ( nNumOfProcs - 1 ) == 0)
         nNrCalculeSclav--;
     
+    int nNrPozitiiToCompute = 0;
     for(int rank = 1; rank < nNumOfProcs; ++rank)
     {
         Pozitie pozitiiPtSclav[1000];
+        nNrPozitiiToCompute = 0;
         
         for(int j = 0; j < nNrCalculeSclav && j + nNrCalculeSclav * (rank - 1) < nPozitiiPosibile; ++j)
         {
-            pozitiiPtSclav[j] = pozitiiPosibile[j + nNrCalculeSclav * (rank - 1)];
+            pozitiiPtSclav[nNrPozitiiToCompute++] = pozitiiPosibile[j + nNrCalculeSclav * (rank - 1)];
         }
         
-        sendToSlaveToCompute(rank, pozitiiPtSclav, vedereNoua, directie);
+        
+        //Trimitem la sclav
+        sendToSlaveToCompute(rank, pozitiiPtSclav, nNrPozitiiToCompute, vedereNoua);
     }
     
     ///
@@ -241,7 +245,11 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
     //Daca noua list are 1 element, am gasit solutia
     
     if(nNrPozPosibileUpdatate == 1)
+    {
+        Pozitie p = pozitiiPosibileUpdatate[0];
+        printf("%d %d %c",p.i,p.j,p.directie);
         return 1;
+    }
     
     //Incercam mutare
     if(deplaseaza('f',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('b',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('l',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('r',vedereNoua,pozitiiPosibileUpdatate) == 0);
@@ -350,17 +358,59 @@ void master()
     
 }
 
-void sendToSlaveToCompute( int rank, Pozitie pozitii[], Vedere vedere, char directie)
+void sendToSlaveToCompute( int rank, Pozitie pozitii[], int nNrPozitiiToCompute, Vedere vedere)
 {
-    
+    MPI_Send(&nNrPozitiiToCompute, 1, MPI_INT, rank, 0, MPI_COMM_WORLD);
+    MPI_Send(&pozitii, nNrPozitiiToCompute, mpi_pozitie, rank, 1, MPI_COMM_WORLD);
+    MPI_Send(&vedere, 1, mpi_vedere, rank, 2, MPI_COMM_WORLD);
 }
 
 void receiveFromSlaves(Pozitie pozitii[], int* nPozitii)
 {
+    (*nPozitii) = 0;
+    Pozitie pozitiiDePrimit[1000];
+    int nPozitiiDePrimit = 0;
     
+    MPI_Status st;
+    
+    for(int rank = 1; rank < nNumOfProcs; ++rank)
+    {
+        nPozitiiDePrimit = 0;
+        MPI_Recv(&nPozitiiDePrimit, 1, MPI_INT, rank, 0, MPI_COMM_WORLD, &st);
+        MPI_Recv(&pozitiiDePrimit, nPozitiiDePrimit, mpi_pozitie, 0, 1, MPI_COMM_WORLD, &st);
+        
+        for(int j = 0; j < nPozitiiDePrimit; ++j)
+            pozitii[++(*nPozitii)] = pozitiiDePrimit[j];
+    }
 }
 
 void slave()
 {
+    Pozitie pozitiiDeProcesat[1000];
+    Vedere vedere;
+    Pozitie pozitiiDeReturnat[1000];
+    int nPozitii, nPozitiiDeReturnat = 0;
     
+    MPI_Status st;
+    
+    int dirI[4], dirJ[4];
+    
+    while(1)
+    {
+        nPozitiiDeReturnat = 0;
+        MPI_Recv(&nPozitii, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &st);
+        MPI_Recv(&pozitiiDeProcesat, nPozitii, mpi_pozitie, 0, 1, MPI_COMM_WORLD, &st);
+        MPI_Recv(&vedere, 1, mpi_vedere, 0, 2, MPI_COMM_WORLD, &st);
+    
+        for(int i=0; i < nPozitii; i++)
+        {
+            Pozitie p = pozitiiDeProcesat[i];
+        
+            if(checkMatch(vedere, p.i, p.j, p.directie))
+                pozitiiDeReturnat[++nPozitiiDeReturnat] = p;
+        }
+    
+        MPI_Send(&nPozitiiDeReturnat, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(&pozitiiDeReturnat, nPozitiiDeReturnat, mpi_pozitie, 0, 1, MPI_COMM_WORLD);
+    }
 }
