@@ -306,6 +306,9 @@ int checkMatch(Vedere vedere,int i, int j,char orientare)
     
     computeOrientationVectors(orientare, dirI, dirJ);
     
+    printf("Vdere: %c %c %c %c %d %d\n",vedere.fata,vedere.spate,vedere.stanga,vedere.dreapta,vedere.i,vedere.j);
+    printf("Comparata cu: %c %c %c %c\n",Harta[i + dirI[0]][j + dirJ[0]],Harta[i + dirI[1]][j + dirJ[1]],Harta[i + dirI[3]][j + dirJ[3]],Harta[i + dirI[2]][j + dirJ[2]]);
+    
     if(vedereCurenta.fata == Harta[i + dirI[0]][j + dirJ[0]]
        && vedereCurenta.dreapta == Harta[i + dirI[2]][j + dirJ[2]]
        && vedereCurenta.spate == Harta[i + dirI[1]][j + dirJ[1]]
@@ -420,6 +423,8 @@ void sendToSlaveToCompute( int rank, Pozitie pozitii[], int nNrPozitiiToCompute,
         printf("M: %d %d %c\n",p.i,p.j,p.directie);
     }
     
+    printf("Vdere trimisa: %c %c %c %c %d %d\n",vedere.fata,vedere.spate,vedere.stanga,vedere.dreapta,vedere.i,vedere.j);
+    
     MPI_Send(&nNrPozitiiToCompute, 1, MPI_INT, rank, 0, MPI_COMM_WORLD);
   //    MPI_Send(&pozitii, nNrPozitiiToCompute, mpi_pozitie, rank, 1, MPI_COMM_WORLD);
     int I[1000],J[1000];
@@ -517,6 +522,8 @@ void slave()
         
 //        if(st.MPI_ERROR != MPI_SUCCESS)
 //            printf("Al treilea in slaves");
+        
+        printf("S %d: Vdere primita: %c %c %c %c %d %d\n",rank,vedere.fata,vedere.spate,vedere.stanga,vedere.dreapta,vedere.i,vedere.j);
     
         for(int i=0; i < nPozitii; i++)
         {
