@@ -138,7 +138,7 @@ void init()
 {
     // citire din fisier
     // TO DO
-    FILE *fp = fopen("Untitled/Users/vladberila/Documents/Dev/Mpi_Scoala/Mpi_Scoala/harta.txt", "r");
+    FILE *fp = fopen("/Users/beckslash/C++/Gitu/Mpi_Scoala/harta.txt", "r");
     if(fp == NULL)
         exit(7);
     fscanf(fp, "%d %d", &N, &M);
@@ -151,7 +151,15 @@ void init()
     
     for(int i = 1 ; i <= N; i++)
         for(int j = 1; j <= M; j++)
-            fscanf(fp, "%c", &Harta[i][j]);
+        {
+            char c;
+            fscanf(fp, "%c", &c);
+            if(c != ' ' && c!= '\n')
+                Harta[i][j] = c;
+            else
+                j--;
+            printf("%c",Harta[i][j]);
+        }
     
     fscanf(fp, "%d %d %c", &profesor.i, &profesor.j, &profesor.directie);
     
