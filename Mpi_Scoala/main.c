@@ -38,7 +38,7 @@ typedef struct Profesor_struct
 } Profesor;
 
 Profesor profesor;
-int Harta[100][100];
+char Harta[100][100];
 int hartaPatternMutari[100][100];
 int N,M;
 
@@ -138,10 +138,24 @@ void init()
 {
     // citire din fisier
     // TO DO
-    FILE *fp = fopen("harta.txt", "r");
+    FILE *fp = fopen("Untitled/Users/vladberila/Documents/Dev/Mpi_Scoala/Mpi_Scoala/harta.txt", "r");
     if(fp == NULL)
         exit(7);
     fscanf(fp, "%d %d", &N, &M);
+    
+    for(int i = 0; i <= N + 1; i++)
+        Harta[i][0] = Harta[i][M + 1] = 'T';
+    
+    for(int i = 0; i <= M + 1; i++)
+        Harta[0][i] = Harta[N + 1][i] = 'T';
+    
+    for(int i = 1 ; i <= N; i++)
+        for(int j = 1; j <= M; j++)
+            fscanf(fp, "%c", &Harta[i][j]);
+    
+    fscanf(fp, "%d %d %c", &profesor.i, &profesor.j, &profesor.directie);
+    
+    fclose(fp);
     
     computeOrientationVectors(profesor.directie, dirIProf, dirJProf);
 }
@@ -377,7 +391,11 @@ void receiveFromSlaves(Pozitie pozitii[], int* nPozitii)
     {
         nPozitiiDePrimit = 0;
         MPI_Recv(&nPozitiiDePrimit, 1, MPI_INT, rank, 0, MPI_COMM_WORLD, &st);
+        if(st.MPI_ERROR != MPI_SUCCESS)
+            printf("Primu in receiveFromSlaves");
         MPI_Recv(&pozitiiDePrimit, nPozitiiDePrimit, mpi_pozitie, 0, 1, MPI_COMM_WORLD, &st);
+        if(st.MPI_ERROR != MPI_SUCCESS)
+            printf("Al doilea in receiveFromSlaves");
         
         for(int j = 0; j < nPozitiiDePrimit; ++j)
             pozitii[(*nPozitii)++] = pozitiiDePrimit[j];
@@ -399,8 +417,14 @@ void slave()
     {
         nPozitiiDeReturnat = 0;
         MPI_Recv(&nPozitii, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &st);
+        if(st.MPI_ERROR != MPI_SUCCESS)
+            printf("Primu in slaves");
         MPI_Recv(&pozitiiDeProcesat, nPozitii, mpi_pozitie, 0, 1, MPI_COMM_WORLD, &st);
+        if(st.MPI_ERROR != MPI_SUCCESS)
+            printf("Al doilea in slaves");
         MPI_Recv(&vedere, 1, mpi_vedere, 0, 2, MPI_COMM_WORLD, &st);
+        if(st.MPI_ERROR != MPI_SUCCESS)
+            printf("Al treilea in slaves");
     
         for(int i=0; i < nPozitii; i++)
         {
