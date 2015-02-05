@@ -218,8 +218,6 @@ void MoveProfessor(char directie)
 //forward, back, left, right
 int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
 {
-    if(hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] == 1)
-        return 0;
     //Nu il deplasam daca da de copac sau prapastie
     if( (directie == 'f' && (vedereCurenta.fata == 'T' || vedereCurenta.fata == 'C')) ||
        (directie == 'b' && (vedereCurenta.spate == 'T' || vedereCurenta.spate == 'C')) ||
@@ -231,10 +229,14 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
     //Il mutam pe profesor
     MoveProfessor(directie);
     
-    hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] = 1;
-    
     //Updatam ce vede
     Vedere vedereNoua = getVedere();
+    
+    //Updatam harta daca putem merge in noua pozitie
+    if(hartaPatternMutari[vedereNoua.i][vedereNoua.j] == 1)
+        return 0;
+    hartaPatternMutari[vedereNoua.i][vedereNoua.j] = 1;
+    
     
     ///
     // Trimitem la sclavi pozitiile, directia si noua vedere
@@ -286,7 +288,7 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
     if(directie == 'b') MoveProfessor('f');
     if(directie == 'l') MoveProfessor('r');
     if(directie == 'r') MoveProfessor('l');
-    hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] = 0;
+    hartaPatternMutari[vedereNoua.i][vedereNoua.j] = 0;
     
     return 0;
     
@@ -375,13 +377,12 @@ void master()
         }
     
     printf("\n%d\n",nPozitiiPosibile);
+    
     for(int i=0;i<nPozitiiPosibile;i++)
     {
         Pozitie p = pozitiiPosibile[i];
-        printf("\n%d %d %c",p.i,p.j,p.directie);
+        printf("%d %d %c\n",p.i,p.j,p.directie);
     }
-    
-    printf("fdsdfs");
     
     ///
     // Il plimbam pe profesor prin padure
@@ -447,12 +448,14 @@ void slave()
     
     MPI_Status st;
     
-    printf("\nSclav");
+    printf("Sclav\n");
     while(1)
     {
-        printf("\Intru in while");
+        printf("Intru in while\n");
         nPozitiiDeReturnat = 0;
         MPI_Recv(&nPozitii, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &st);
+        
+        printf("Nr pozitii de procesat: %d", nPozitii);
         
         if(nPozitii == -321)
             break;
