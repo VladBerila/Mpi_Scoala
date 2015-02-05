@@ -310,6 +310,8 @@ void master()
 {
     Vedere vedereCurenta = getVedere();
     
+//    printf("%d %d %c",profesor.i,profesor.j,profesor.directie);
+    
     ///
     // Gasim pozitiile initiale posibile
     ///
@@ -366,7 +368,12 @@ void master()
             
         }
     
-    printf("%d\n",nPozitiiPosibile);
+    //printf("%d\n",nPozitiiPosibile);
+    for(int i=0;i<nPozitiiPosibile;i++)
+    {
+        Pozitie p = pozitiiPosibile[i];
+        printf("\n%d %d %c",p.i,p.j,p.directie);
+    }
     
     ///
     // Il plimbam pe profesor prin padure
