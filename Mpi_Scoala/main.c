@@ -453,7 +453,7 @@ void slave()
             Pozitie p = pozitiiDeProcesat[i];
         
             if(checkMatch(vedere, p.i, p.j, p.directie))
-                pozitiiDeReturnat[++nPozitiiDeReturnat] = p;
+                pozitiiDeReturnat[nPozitiiDeReturnat++] = p;
         }
     
         MPI_Send(&nPozitiiDeReturnat, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
