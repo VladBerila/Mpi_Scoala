@@ -137,7 +137,7 @@ void init()
 {
     // citire din fisier
     // TO DO
-    FILE *fp = fopen("/Users/beckslash/C++/Gitu/Mpi_Scoala/harta.txt", "r");
+    FILE *fp = fopen("/Users/vladberila/Documents/Dev/Mpi_Scoala/Mpi_Scoala/harta.txt", "r");
     if(fp == NULL)
         exit(7);
     fscanf(fp, "%d %d", &N, &M);
@@ -332,8 +332,7 @@ int checkMatchCuDeplasare(Vedere vedere, Pozitie pozitie, char directie)
         case 'r' : NouaPozitie.i += dirI[2], NouaPozitie.j += dirJ[2]; break;
         case 'l' : NouaPozitie.i += dirI[3], NouaPozitie.j += dirJ[3]; break;
     }
-    
-    return checkMatch(vedere, NouaPozitie.i, NouaPozitie.j, pozitie.directie);
+    return checkMatch(vedere, pozitie.i, pozitie.j, pozitie.directie);
 }
 
 void master()
