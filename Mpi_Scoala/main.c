@@ -63,7 +63,8 @@ void slave();
 void computeOrientationVectors(char orientare, int dirI[4], int dirJ[4]);
 void init();
 int checkMatch( Vedere vedere,int i, int j,char orientare);
-void sendToSlaveToCompute(int, Pozitie[], int, Vedere);
+int checkMatchCuDeplasare(Vedere, Pozitie, char directie);
+void sendToSlaveToCompute(int, Pozitie[], int, char directie, Vedere);
 void receiveFromSlaves( Pozitie[], int*);
 void stopSlaves();
 
@@ -261,7 +262,7 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
         //Trimitem la sclav
         printf("Sclavul %d sa proceseze %d pozitii!\n",rank,nNrPozitiiToCompute);
         
-        sendToSlaveToCompute(rank, pozitiiPtSclav, nNrPozitiiToCompute, vedereNoua);
+        sendToSlaveToCompute(rank, pozitiiPtSclav, nNrPozitiiToCompute, directie, vedereNoua);
     }
     
     ///
@@ -306,9 +307,6 @@ int checkMatch(Vedere vedere,int i, int j,char orientare)
     
     computeOrientationVectors(orientare, dirI, dirJ);
     
-    printf("Vdere: %c %c %c %c %d %d\n",vedere.fata,vedere.spate,vedere.stanga,vedere.dreapta,vedere.i,vedere.j);
-    printf("Comparata cu: %c %c %c %c\n",Harta[i + dirI[0]][j + dirJ[0]],Harta[i + dirI[1]][j + dirJ[1]],Harta[i + dirI[3]][j + dirJ[3]],Harta[i + dirI[2]][j + dirJ[2]]);
-    
     if(vedereCurenta.fata == Harta[i + dirI[0]][j + dirJ[0]]
        && vedereCurenta.dreapta == Harta[i + dirI[2]][j + dirJ[2]]
        && vedereCurenta.spate == Harta[i + dirI[1]][j + dirJ[1]]
@@ -316,6 +314,11 @@ int checkMatch(Vedere vedere,int i, int j,char orientare)
         return 1;
     
     
+    return 0;
+}
+
+int checkMatchCuDeplasare(Vedere vedere, Pozitie pozitie, char directie);
+{
     return 0;
 }
 
@@ -414,7 +417,7 @@ void stopSlaves()
     }
 }
 
-void sendToSlaveToCompute( int rank, Pozitie pozitii[], int nNrPozitiiToCompute, Vedere vedere)
+void sendToSlaveToCompute( int rank, Pozitie pozitii[], int nNrPozitiiToCompute, char directie, Vedere vedere)
 {
     printf("Rank: %d\n",rank);
     for(int i=0;i<nNrPozitiiToCompute;i++)
@@ -446,6 +449,8 @@ void sendToSlaveToCompute( int rank, Pozitie pozitii[], int nNrPozitiiToCompute,
     MPI_Send(&(vedere.dreapta), 1, MPI_CHAR, rank, 23, MPI_COMM_WORLD);
     MPI_Send(&(vedere.i), 1, MPI_INT, rank, 24, MPI_COMM_WORLD);
     MPI_Send(&(vedere.j), 1, MPI_INT, rank, 25, MPI_COMM_WORLD);
+    
+    MPI_Send(&directie, 1, MPI_CHAR, rank, 3, MPI_COMM_WORLD);
 }
 
 void receiveFromSlaves(Pozitie pozitii[], int* nPozitii)
@@ -477,6 +482,7 @@ void slave()
     Vedere vedere;
     Pozitie pozitiiDeReturnat[1000];
     int nPozitii, nPozitiiDeReturnat = 0;
+    char directie;
     
     MPI_Status st;
     
@@ -519,6 +525,7 @@ void slave()
         MPI_Recv(&(vedere.i), 1, MPI_INT, 0, 24, MPI_COMM_WORLD, &st);
         MPI_Recv(&(vedere.j), 1, MPI_INT, 0, 25, MPI_COMM_WORLD, &st);
 
+        MPI_Recv(&directie, 1, MPI_CHAR, 0, 3, MPI_COMM_WORLD, &st);
         
 //        if(st.MPI_ERROR != MPI_SUCCESS)
 //            printf("Al treilea in slaves");
@@ -530,7 +537,7 @@ void slave()
             Pozitie p = pozitiiDeProcesat[i];
             printf("S %d: %d %d %c\n",rank,p.i,p.j,p.directie);
         
-            if(checkMatch(vedere, p.i, p.j, p.directie))
+            if(checkMatchCuDeplasare(vedere, p, directie))
                 pozitiiDeReturnat[nPozitiiDeReturnat++] = p;
         }
         
