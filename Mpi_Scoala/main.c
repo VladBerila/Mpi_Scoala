@@ -321,12 +321,16 @@ int checkMatchCuDeplasare(Vedere vedere, Pozitie pozitie, char directie)
 {
     Pozitie NouaPozitie = pozitie;
     
+    int dirI[4], dirJ[4];
+    
+    computeOrientationVectors(pozitie.directie, dirI, dirJ);
+    
     switch (directie)
     {
-        case 'f' : NouaPozitie.i += dirIProf[0], NouaPozitie.j += dirJProf[0]; break;
-        case 'b' : NouaPozitie.i += dirIProf[1], NouaPozitie.j += dirJProf[1]; break;
-        case 'r' : NouaPozitie.i += dirIProf[2], NouaPozitie.j += dirJProf[2]; break;
-        case 'l' : NouaPozitie.i += dirIProf[3], NouaPozitie.j += dirJProf[3]; break;
+        case 'f' : NouaPozitie.i += dirI[0], NouaPozitie.j += dirJ[0]; break;
+        case 'b' : NouaPozitie.i += dirI[1], NouaPozitie.j += dirJ[1]; break;
+        case 'r' : NouaPozitie.i += dirI[2], NouaPozitie.j += dirJ[2]; break;
+        case 'l' : NouaPozitie.i += dirI[3], NouaPozitie.j += dirJ[3]; break;
     }
     
     return checkMatch(vedere, NouaPozitie.i, NouaPozitie.j, pozitie.directie);
