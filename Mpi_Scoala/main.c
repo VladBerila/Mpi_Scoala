@@ -380,7 +380,7 @@ void receiveFromSlaves(Pozitie pozitii[], int* nPozitii)
         MPI_Recv(&pozitiiDePrimit, nPozitiiDePrimit, mpi_pozitie, 0, 1, MPI_COMM_WORLD, &st);
         
         for(int j = 0; j < nPozitiiDePrimit; ++j)
-            pozitii[++(*nPozitii)] = pozitiiDePrimit[j];
+            pozitii[(*nPozitii)++] = pozitiiDePrimit[j];
     }
 }
 
