@@ -38,8 +38,8 @@ typedef struct Profesor_struct
 } Profesor;
 
 Profesor profesor;
-char Harta[100][100];
-int hartaPatternMutari[100][100];
+char Harta[1000][1000];
+int hartaPatternMutari[1000][1000];
 int N,M;
 
 // orientarea profului e publica si globala doar ca un move helper pt el. sclavii nu stiu de ea
@@ -57,6 +57,8 @@ int nNumOfProcs, rank;
 
 Pozitie pozitiiPosibile[10000];
 int nPozitiiPosibile = 0;
+
+int GASIT = 0;
 
 void master();
 void slave();
@@ -112,12 +114,16 @@ int main(int argc, char * argv[])
     
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
+    double start,end;
+    MPI_Barrier(MPI_COMM_WORLD); /* IMPORTANT */
+    start = MPI_Wtime();
+    
     createMPIStruct();
     
     if(rank == 0)
         init();
     
-    MPI_Bcast(&Harta, 100 * 100, MPI_CHAR, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&Harta, 1000 * 1000, MPI_CHAR, 0, MPI_COMM_WORLD);
     MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&M, 1, MPI_INT, 0, MPI_COMM_WORLD);
     
@@ -126,6 +132,14 @@ int main(int argc, char * argv[])
     else
         slave();
     
+    MPI_Barrier(MPI_COMM_WORLD); /* IMPORTANT */
+    end = MPI_Wtime();
+    
+    if(rank == 0)
+    {
+        printf("Start: %f %f\n",start,end);
+        printf("Durata executie: %f\n",(end-start));
+    }
     MPI_Type_free(&mpi_pozitie);
     MPI_Type_free(&mpi_vedere);
     MPI_Finalize();
@@ -215,17 +229,32 @@ void MoveProfessor(char directie)
     //    printf("Profesor mutat\n");
 }
 
+void MoveProfessorBack(char directie)
+{
+    if(directie == 'f') MoveProfessor('b');
+    if(directie == 'b') MoveProfessor('f');
+    if(directie == 'l') MoveProfessor('r');
+    if(directie == 'r') MoveProfessor('l');
+}
+
 //directie = f,b,l,r
 //forward, back, left, right
-int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
+int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[], int nPozitiiPosibile)
 {
+    if(GASIT)
+        return 1;
+    printf("Incercam %c\n",directie);
+    
     //Nu il deplasam daca da de copac sau prapastie
     if( (directie == 'f' && (vedereCurenta.fata == 'T' || vedereCurenta.fata == 'C')) ||
        (directie == 'b' && (vedereCurenta.spate == 'T' || vedereCurenta.spate == 'C')) ||
        (directie == 'l' && (vedereCurenta.stanga == 'T' || vedereCurenta.stanga == 'C')) ||
        (directie == 'r' && (vedereCurenta.dreapta == 'T' || vedereCurenta.dreapta == 'C'))
        )
+    {
+        printf("Nu a mers: copac\n");
         return 0;
+    }
     
     //Il mutam pe profesor
     MoveProfessor(directie);
@@ -235,7 +264,12 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
     
     //Updatam harta daca putem merge in noua pozitie
     if(hartaPatternMutari[vedereNoua.i][vedereNoua.j] == 1)
+    {
+        MoveProfessorBack(directie);
+        printf("%d %d\n", vedereNoua.i, vedereNoua.j);
+        printf("Nu a mers: ciclu\n");
         return 0;
+    }
     hartaPatternMutari[vedereNoua.i][vedereNoua.j] = 1;
     
     
@@ -250,7 +284,7 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
     int nNrPozitiiToCompute = 0;
     for(int rank = 1; rank < nNumOfProcs; ++rank)
     {
-        Pozitie pozitiiPtSclav[1000];
+        Pozitie pozitiiPtSclav[10000];
         nNrPozitiiToCompute = 0;
         
         for(int j = 0; j < nNrCalculeSclav && j + nNrCalculeSclav * (rank - 1) < nPozitiiPosibile; ++j)
@@ -268,7 +302,7 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
     ///
     // Ne returneaza pozitiile care se potrivesc si facem o noua lista
     ///
-    Pozitie pozitiiPosibileUpdatate[1000];
+    Pozitie pozitiiPosibileUpdatate[10000];
     int nNrPozPosibileUpdatate = 0;
     
     receiveFromSlaves(pozitiiPosibileUpdatate, &nNrPozPosibileUpdatate);
@@ -280,19 +314,40 @@ int deplaseaza(char directie, Vedere vedereCurenta, Pozitie pozitiiPosibile[])
     {
         stopSlaves();
         Pozitie p = pozitiiPosibileUpdatate[0];
-        printf("Profesorul este: %d %d %c",p.i,p.j,p.directie);
+        printf("Profesorul este: %d %d %c\n",p.i,p.j,p.directie);
+        GASIT = 1;
         return 1;
     }
     
+    //Mutam pozitiile care au mers mutate
+    for(int i=0; i< nNrPozPosibileUpdatate; i++)
+    {
+        int dirI[4], dirJ[4];
+        computeOrientationVectors(pozitiiPosibileUpdatate[i].directie, dirI, dirJ);
+        printf("Pozitie veche: %d %d %c\n",pozitiiPosibileUpdatate[i].i,pozitiiPosibileUpdatate[i].j,pozitiiPosibileUpdatate[i].directie);
+        switch (directie)
+        {
+            case 'f' : pozitiiPosibileUpdatate[i].i += dirI[0], pozitiiPosibileUpdatate[i].j += dirJ[0]; break;
+            case 'b' : pozitiiPosibileUpdatate[i].i += dirI[1], pozitiiPosibileUpdatate[i].j += dirJ[1]; break;
+            case 'r' : pozitiiPosibileUpdatate[i].i += dirI[2], pozitiiPosibileUpdatate[i].j += dirJ[2]; break;
+            case 'l' : pozitiiPosibileUpdatate[i].i += dirI[3], pozitiiPosibileUpdatate[i].j += dirJ[3]; break;
+        }
+        printf("->Pozitie noua: %d %d\n",pozitiiPosibileUpdatate[i].i,pozitiiPosibileUpdatate[i].j);
+    }
+    printf("\n\n");
+    
+    
     //Incercam mutare
-    if(deplaseaza('f',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('b',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('l',vedereNoua,pozitiiPosibileUpdatate) == 0) if(deplaseaza('r',vedereNoua,pozitiiPosibileUpdatate) == 0);
+    deplaseaza('f',vedereNoua,pozitiiPosibileUpdatate,nNrPozPosibileUpdatate);
+    deplaseaza('b',vedereNoua,pozitiiPosibileUpdatate,nNrPozPosibileUpdatate);
+    deplaseaza('l',vedereNoua,pozitiiPosibileUpdatate,nNrPozPosibileUpdatate);
+    deplaseaza('r',vedereNoua,pozitiiPosibileUpdatate,nNrPozPosibileUpdatate);
     
     //Resetam Patternul, o poate lua si pe aici acum
-    if(directie == 'f') MoveProfessor('b');
-    if(directie == 'b') MoveProfessor('f');
-    if(directie == 'l') MoveProfessor('r');
-    if(directie == 'r') MoveProfessor('l');
+    MoveProfessorBack(directie);
     hartaPatternMutari[vedereNoua.i][vedereNoua.j] = 0;
+    
+    printf("Ne intoarcem...\n");
     
     return 0;
     
@@ -394,8 +449,9 @@ void master()
             
         }
     
-    //printf("\n%d\n",nPozitiiPosibile);
+    printf("%d\n",nPozitiiPosibile);
     
+    printf("Pozitii posibile initiale: \n");
     for(int i=0;i<nPozitiiPosibile;i++)
     {
         Pozitie p = pozitiiPosibile[i];
@@ -406,10 +462,10 @@ void master()
     // Il plimbam pe profesor prin padure
     ///
     hartaPatternMutari[vedereCurenta.i][vedereCurenta.j] = 1;
-    if(deplaseaza('f',vedereCurenta,pozitiiPosibile) == 0)
-        if(deplaseaza('b',vedereCurenta,pozitiiPosibile) == 0)
-            if(deplaseaza('l',vedereCurenta,pozitiiPosibile) == 0)
-                if(deplaseaza('r',vedereCurenta,pozitiiPosibile) == 0);
+    if(deplaseaza('f',vedereCurenta,pozitiiPosibile,nPozitiiPosibile) == 0)
+        if(deplaseaza('b',vedereCurenta,pozitiiPosibile,nPozitiiPosibile) == 0)
+            if(deplaseaza('l',vedereCurenta,pozitiiPosibile,nPozitiiPosibile) == 0)
+                if(deplaseaza('r',vedereCurenta,pozitiiPosibile,nPozitiiPosibile) == 0);
     
     
     
@@ -429,19 +485,19 @@ void stopSlaves()
 
 void sendToSlaveToCompute( int rank, Pozitie pozitii[], int nNrPozitiiToCompute, char directie, Vedere vedere)
 {
-    printf("Rank: %d\n",rank);
+//    printf("Rank: %d\n",rank);
     for(int i=0;i<nNrPozitiiToCompute;i++)
     {
         Pozitie p = pozitii[i];
-        printf("M: %d %d %c\n",p.i,p.j,p.directie);
+//        printf("M: %d %d %c\n",p.i,p.j,p.directie);
     }
     
-    printf("Vdere trimisa: %c %c %c %c %d %d\n",vedere.fata,vedere.spate,vedere.stanga,vedere.dreapta,vedere.i,vedere.j);
+//    printf("Vdere trimisa: %c %c %c %c %d %d\n",vedere.fata,vedere.spate,vedere.stanga,vedere.dreapta,vedere.i,vedere.j);
     
     MPI_Send(&nNrPozitiiToCompute, 1, MPI_INT, rank, 0, MPI_COMM_WORLD);
     //    MPI_Send(&pozitii, nNrPozitiiToCompute, mpi_pozitie, rank, 1, MPI_COMM_WORLD);
-    int I[1000],J[1000];
-    char C[1000];
+    int I[10000],J[10000];
+    char C[10000];
     for(int i=0; i < nNrPozitiiToCompute; i++)
     {
         I[i] = pozitii[i].i;
@@ -466,14 +522,14 @@ void sendToSlaveToCompute( int rank, Pozitie pozitii[], int nNrPozitiiToCompute,
 void receiveFromSlaves(Pozitie pozitii[], int* nPozitii)
 {
     (*nPozitii) = 0;
-    Pozitie pozitiiDePrimit[1000];
+    Pozitie pozitiiDePrimit[10000];
     int nPozitiiDePrimit = 0;
     
     MPI_Status st;
     
     for(int rank = 1; rank < nNumOfProcs; ++rank)
     {
-        printf("Astept de la sclavul %d\n",rank);
+        //printf("Astept de la sclavul %d\n",rank);
         
         nPozitiiDePrimit = 0;
         MPI_Recv(&nPozitiiDePrimit, 1, MPI_INT, rank, 0, MPI_COMM_WORLD, &st);
@@ -481,8 +537,8 @@ void receiveFromSlaves(Pozitie pozitii[], int* nPozitii)
             printf("Primu in receiveFromSlaves");
         
         //MPI_Recv(&pozitiiDePrimit, nPozitiiDePrimit, mpi_pozitie, 0, 1, MPI_COMM_WORLD, &st);
-        int I[1000],J[1000];
-        char C[1000];
+        int I[10000],J[10000];
+        char C[10000];
         MPI_Recv(&I, nPozitiiDePrimit, MPI_INT, rank, 10, MPI_COMM_WORLD, &st);
         MPI_Recv(&J, nPozitiiDePrimit, MPI_INT, rank, 11, MPI_COMM_WORLD, &st);
         MPI_Recv(&C, nPozitiiDePrimit, MPI_CHAR, rank, 12, MPI_COMM_WORLD, &st);
@@ -499,15 +555,15 @@ void receiveFromSlaves(Pozitie pozitii[], int* nPozitii)
         for(int j = 0; j < nPozitiiDePrimit; ++j)
             pozitii[(*nPozitii)++] = pozitiiDePrimit[j];
         
-        printf("Poz primite de la sclavul %d: %d\n",rank,nPozitiiDePrimit);
+        printf("Poz [bune] primite de la sclavul %d: %d\n",rank,nPozitiiDePrimit);
     }
 }
 
 void slave()
 {
-    Pozitie pozitiiDeProcesat[1000];
+    Pozitie pozitiiDeProcesat[10000];
     Vedere vedere;
-    Pozitie pozitiiDeReturnat[1000];
+    Pozitie pozitiiDeReturnat[10000];
     int nPozitii, nPozitiiDeReturnat = 0;
     char directie;
     
@@ -529,8 +585,8 @@ void slave()
         //            printf("Primu in slaves");
         
         //MPI_Recv(&pozitiiDeProcesat, nPozitii, mpi_pozitie, 0, 1, MPI_COMM_WORLD, &st);
-        int I[1000],J[1000];
-        char C[1000];
+        int I[10000],J[10000];
+        char C[10000];
         MPI_Recv(&I, nPozitii, MPI_INT, 0, 10, MPI_COMM_WORLD, &st);
         MPI_Recv(&J, nPozitii, MPI_INT, 0, 11, MPI_COMM_WORLD, &st);
         MPI_Recv(&C, nPozitii, MPI_CHAR, 0, 12, MPI_COMM_WORLD, &st);
@@ -557,18 +613,18 @@ void slave()
         //        if(st.MPI_ERROR != MPI_SUCCESS)
         //            printf("Al treilea in slaves");
         
-        printf("S %d: Vdere primita: %c %c %c %c %d %d\n",rank,vedere.fata,vedere.spate,vedere.stanga,vedere.dreapta,vedere.i,vedere.j);
+//        printf("S %d: Vdere primita: %c %c %c %c %d %d\n",rank,vedere.fata,vedere.spate,vedere.stanga,vedere.dreapta,vedere.i,vedere.j);
         
         for(int i=0; i < nPozitii; i++)
         {
             Pozitie p = pozitiiDeProcesat[i];
-            printf("S %d: %d %d %c\n",rank,p.i,p.j,p.directie);
+//            printf("S %d: %d %d %c\n",rank,p.i,p.j,p.directie);
             
             if(checkMatchCuDeplasare(vedere, p, directie))
                 pozitiiDeReturnat[nPozitiiDeReturnat++] = p;
         }
         
-        printf("S %d: Pozitii inca bune: %d\n",rank,nPozitiiDeReturnat);
+//        printf("S %d: Pozitii inca bune: %d\n",rank,nPozitiiDeReturnat);
         
         MPI_Send(&nPozitiiDeReturnat, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
 //        MPI_Send(&pozitiiDeReturnat, nPozitiiDeReturnat, mpi_pozitie, 0, 1, MPI_COMM_WORLD);
