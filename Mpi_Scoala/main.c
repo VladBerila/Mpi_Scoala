@@ -114,9 +114,11 @@ int main(int argc, char * argv[])
     
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
-    double start,end;
+    double start,end,end2;
+    double a,b;
     MPI_Barrier(MPI_COMM_WORLD); /* IMPORTANT */
     start = MPI_Wtime();
+    a = MPI_Wtime();
     
     createMPIStruct();
     
@@ -127,18 +129,24 @@ int main(int argc, char * argv[])
     MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&M, 1, MPI_INT, 0, MPI_COMM_WORLD);
     
+    MPI_Barrier(MPI_COMM_WORLD); /* IMPORTANT */
+    end = MPI_Wtime();
+    
     if(rank == 0)
         master();
     else
         slave();
     
     MPI_Barrier(MPI_COMM_WORLD); /* IMPORTANT */
-    end = MPI_Wtime();
+    end2 = MPI_Wtime();
+    b = MPI_Wtime();
+
     
     if(rank == 0)
     {
-        printf("Start: %f %f\n",start,end);
-        printf("Durata executie: %f\n",(end-start));
+        printf("Durata Bcast: %f\n",(end-start));
+        printf("Durata Algoritm: %f\n",(end2-end));
+        printf("Durata Algoritm: %f\n",(b-a));
     }
     MPI_Type_free(&mpi_pozitie);
     MPI_Type_free(&mpi_vedere);
